@@ -54,6 +54,12 @@ public class PrintAction
 	private String status;
 	
 	@Column
+	private String faces;
+	
+	@Column
+	private String user;
+	
+	@Column
 	private Date date;
 	
 }

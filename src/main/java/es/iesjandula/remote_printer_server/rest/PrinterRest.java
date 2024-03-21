@@ -8,12 +8,14 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -85,7 +87,8 @@ public class PrinterRest
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
 	public ResponseEntity<?> printPDF(@RequestParam(required = true) String printerName,
 			@RequestParam(required = true) Integer numCopies, @RequestParam(required = true) String orientation,
-			@RequestParam(required = true) String color, @RequestBody(required = true) MultipartFile file)
+			@RequestParam(required = true) String color,@RequestParam(required = true) String faces,
+			@RequestParam(required = true) String user,@RequestBody(required = true) MultipartFile file)
 	{
 		try
 		{
@@ -96,6 +99,8 @@ public class PrinterRest
 			printAction.setNumCopies(numCopies);
 			printAction.setColor(color);
 			printAction.setOrientation(orientation);
+			printAction.setFaces(faces);
+			printAction.setUser(user);
 			printAction.setStatus(PrintAction.TO_DO);
 			printAction.setDate(new Date());
 
@@ -159,11 +164,74 @@ public class PrinterRest
 					headers.set("orientation", "false");
 				}
 				
+				if (printAction.getFaces().equalsIgnoreCase("Single"))
+				{
+					headers.set("faces", "false");
+				} else
+				{
+					headers.set("faces", "true");
+				}
+				
+				headers.set("user", printAction.getUser());
+				headers.set("id", String.valueOf(printAction.getId()));
+				
 				return ResponseEntity.ok().headers(headers).body(outcomeInputStreamResource);
 			}
 
 			return ResponseEntity.ok().build();
 
+		} catch (Exception exception)
+		{
+			String error = "Error getting the printers";
+			log.error(error, exception);
+			return ResponseEntity.status(500).build();
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/get/print/status")
+	public ResponseEntity<?> getPrintFinalization(
+			@RequestHeader(name = "id") String id,
+			@RequestHeader(name = "status")	String status)
+	{
+		try
+		{		
+			Optional<PrintAction> action = this.printActionRepository.findById(Long.valueOf(id));	
+			if (action.isPresent())
+			{
+				if (status.equalsIgnoreCase(PrintAction.DONE))
+				{
+					action.get().setStatus(PrintAction.DONE);
+				}else 
+				{
+					action.get().setStatus(PrintAction.ERROR);
+				}
+				this.printActionRepository.saveAndFlush(action.get());
+				return ResponseEntity.ok().build();
+			}
+			else 
+			{
+				return ResponseEntity.status(400).body("No action found");
+			}
+		} catch (Exception exception)
+		{
+			String error = "Error getting the printers";
+			log.error(error, exception);
+			return ResponseEntity.status(500).build();
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/get/user/prints")
+	public ResponseEntity<?> getUserPrints(
+			@RequestParam(name = "user")String user)
+	{
+		try
+		{		
+			List<PrintAction> actions = this.printActionRepository.findByUser(user);
+			
+			actions.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
+			
+			return ResponseEntity.ok().body(actions);
+			
 		} catch (Exception exception)
 		{
 			String error = "Error getting the printers";

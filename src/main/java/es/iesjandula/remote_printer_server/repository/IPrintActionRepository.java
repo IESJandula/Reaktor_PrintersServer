@@ -9,4 +9,5 @@ import es.iesjandula.remote_printer_server.models.PrintAction;
 public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 {
 	public List<PrintAction> findByStatus(String status);
+	public List<PrintAction> findByUser(String user);
 }
