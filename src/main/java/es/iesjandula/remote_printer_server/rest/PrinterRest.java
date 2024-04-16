@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,6 +61,32 @@ public class PrinterRest
 			return ResponseEntity.status(500).build();
 		}
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/get/document", produces = "multipart/form-data")
+	public ResponseEntity<?> getDocument(@RequestParam(required = true) Long id)
+	{
+		try
+		{
+			Optional<PrintAction> optional = this.printActionRepository.findById(id);
+			
+			if (optional.isPresent())
+			{
+	            byte[] bytes = Files.readAllBytes(Paths.get(this.filePath + File.separator + optional.get().getId() + File.separator + optional.get().getFileName()));
+	            return ResponseEntity.ok().body(bytes);
+			}else 
+			{
+				String message = "No existe printAction para ese id";
+				log.error(message);
+				return ResponseEntity.status(401).body(message);
+			}
+			
+		} catch (Exception exception)
+		{
+			String error = "Error getting the printers";
+			log.error(error, exception);
+			return ResponseEntity.status(500).build();
+		}
+	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/get/printers")
 	public ResponseEntity<?> getPrinters()
@@ -94,6 +121,7 @@ public class PrinterRest
 		{
 			PrintAction printAction = new PrintAction();
 
+			Date date = new Date();
 			printAction.setPrinterName(printerName);
 			printAction.setFileName(file.getOriginalFilename());
 			printAction.setNumCopies(numCopies);
@@ -102,10 +130,16 @@ public class PrinterRest
 			printAction.setFaces(faces);
 			printAction.setUser(user);
 			printAction.setStatus(PrintAction.TO_DO);
-			printAction.setDate(new Date());
-
-			this.writeText(this.filePath + printAction.getFileName(), file.getBytes());
+			printAction.setDate(date);
 			this.printActionRepository.saveAndFlush(printAction);
+
+			List<PrintAction> actions = this.printActionRepository.findByUserAndDate(user, date);
+			
+			File folder = new File(this.filePath + File.separator + actions.get(0).getId());
+			
+			folder.mkdir();
+			
+			this.writeText(this.filePath + File.separator + actions.get(0).getId() + File.separator + printAction.getFileName(), file.getBytes());
 
 			return ResponseEntity.ok().build();
 		} catch (Exception exception)
@@ -136,7 +170,7 @@ public class PrinterRest
 				printAction.setStatus(PrintAction.SEND);
 				this.printActionRepository.saveAndFlush(printAction);
 
-				File file = new File(this.filePath + printAction.getFileName());
+				File file = new File(this.filePath + File.separator +printAction.getId()+ File.separator + printAction.getFileName());
 
 				byte[] contenidoDelFichero = Files.readAllBytes(file.toPath());
 
