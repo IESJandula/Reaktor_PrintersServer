@@ -274,6 +274,7 @@ public class PrinterRest
 			
 			if (user != null)
 			{
+				log.info( "User:" + user);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				for (PrintAction printAction : actions)
@@ -287,6 +288,7 @@ public class PrinterRest
 			
 			if (status != null)
 			{
+				log.info( "Status:" + status);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				for (PrintAction printAction : actions)
@@ -300,6 +302,7 @@ public class PrinterRest
 			
 			if (printerName != null)
 			{
+				log.info( "Printer:" + printerName);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				for (PrintAction printAction : actions)
@@ -313,6 +316,7 @@ public class PrinterRest
 			
 			if (date != null)
 			{
+				log.info( "date:" + date);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
@@ -330,6 +334,8 @@ public class PrinterRest
 			
 			if (numCopies != null)
 			{
+				
+				log.info( "numCopies:" + numCopies);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				for (PrintAction printAction : actions)
@@ -343,6 +349,7 @@ public class PrinterRest
 			
 			if (color != null)
 			{
+				log.info( "color:" + color);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				for (PrintAction printAction : actions)
@@ -356,6 +363,7 @@ public class PrinterRest
 			
 			if (faces != null)
 			{
+				log.info( "faces:" + faces);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				for (PrintAction printAction : actions)
@@ -369,6 +377,7 @@ public class PrinterRest
 			
 			if (orientation != null)
 			{
+				log.info( "orientation:" + orientation);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
 				
 				for (PrintAction printAction : actions)
