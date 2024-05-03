@@ -272,7 +272,7 @@ public class PrinterRest
 			
 			List<PrintAction> actions = this.printActionRepository.findAll();
 			
-			if (user != null)
+			if (user != null && !user.equals(""))
 			{
 				log.info( "User:" + user);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
@@ -286,7 +286,7 @@ public class PrinterRest
 				actions = filteredActions;
 			}
 			
-			if (status != null)
+			if (status != null && !status.equals(""))
 			{
 				log.info( "Status:" + status);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
@@ -300,7 +300,7 @@ public class PrinterRest
 				actions = filteredActions;
 			}
 			
-			if (printerName != null)
+			if (printerName != null && !printerName.equals(""))
 			{
 				log.info( "Printer:" + printerName);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
@@ -314,7 +314,7 @@ public class PrinterRest
 				actions = filteredActions;
 			}
 			
-			if (date != null)
+			if (date != null && !date.equals(""))
 			{
 				log.info( "date:" + date);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
@@ -332,7 +332,7 @@ public class PrinterRest
 				actions = filteredActions;
 			}
 			
-			if (numCopies != null)
+			if (numCopies != null && !numCopies.equals(""))
 			{
 				
 				log.info( "numCopies:" + numCopies);
@@ -347,7 +347,7 @@ public class PrinterRest
 				actions = filteredActions;
 			}
 			
-			if (color != null)
+			if (color != null && !color.equals(""))
 			{
 				log.info( "color:" + color);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
@@ -361,7 +361,7 @@ public class PrinterRest
 				actions = filteredActions;
 			}
 			
-			if (faces != null)
+			if (faces != null && !faces.equals(""))
 			{
 				log.info( "faces:" + faces);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
@@ -375,7 +375,7 @@ public class PrinterRest
 				actions = filteredActions;
 			}
 			
-			if (orientation != null)
+			if (orientation != null && !orientation.equals(""))
 			{
 				log.info( "orientation:" + orientation);
 				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
