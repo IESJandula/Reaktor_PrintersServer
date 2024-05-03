@@ -279,7 +279,7 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getUser() == user) {
+					if(printAction.getUser().equals(user)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -293,7 +293,7 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getStatus() == status) {
+					if(printAction.getStatus().equals(status)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -307,7 +307,7 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getStatus() == status) {
+					if(printAction.getPrinterName().equals(printerName)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -325,14 +325,14 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getStatus() == status) {
+					if(printAction.getDate().equals(date)) {
 						filteredActions.add(printAction);
 					}
 				}
 				actions = filteredActions;
 			}
 			
-			if (numCopies != null && !numCopies.equals(""))
+			if (numCopies != null)
 			{
 				
 				log.info( "numCopies:" + numCopies);
@@ -354,7 +354,7 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getColor() == color) {
+					if(printAction.getColor().equals(color)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -368,7 +368,7 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getFaces() == faces) {
+					if(printAction.getFaces().equals(faces)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -382,7 +382,7 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getOrientation() == orientation) {
+					if(printAction.getOrientation().equals(orientation)) {
 						filteredActions.add(printAction);
 					}
 				}
