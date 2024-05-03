@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -256,11 +258,127 @@ public class PrinterRest
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/get/user/prints")
 	public ResponseEntity<?> getUserPrints(
-			@RequestParam(name = "user")String user)
+			@RequestParam(required = false) Integer numCopies,
+			@RequestParam(required = false) String date,
+			@RequestParam(required = false) String color,
+			@RequestParam(required = false) String faces,
+			@RequestParam(required = false) String orientation,
+			@RequestParam(required = false) String printerName,
+			@RequestParam(required = false) String user, 
+			@RequestParam(required = false) String status)
 	{
 		try
-		{		
-			List<PrintAction> actions = this.printActionRepository.findByUser(user);
+		{	
+			
+			List<PrintAction> actions = this.printActionRepository.findAll();
+			
+			if (user != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getUser() == user) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (status != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getStatus() == status) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (printerName != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getStatus() == status) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (date != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+				
+				Date d = format.parse(date);
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getStatus() == status) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (numCopies != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getNumCopies() == numCopies) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (color != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getColor() == color) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (faces != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getFaces() == faces) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (orientation != null)
+			{
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getOrientation() == orientation) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
 			
 			actions.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
 			
