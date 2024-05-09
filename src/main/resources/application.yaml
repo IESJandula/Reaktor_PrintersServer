@@ -1,0 +1,15 @@
+spring:
+  jpa.hibernate.ddl-auto: none
+  datasource:
+    url: jdbc:mysql://localhost:3306/remote_printer
+    username: root
+    password: toor
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 5
+  servlet:
+    multipart:
+      max-request-size: -1
+      max-file-size: -1
+server:
+  port: 8082

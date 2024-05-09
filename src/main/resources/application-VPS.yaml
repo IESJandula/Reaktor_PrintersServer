@@ -1,0 +1,27 @@
+spring:
+  jpa.hibernate.ddl-auto: create
+  datasource:
+    url: jdbc:mysql://localhost:3306/remote_printer
+    username: root
+    password: 7_ap49y4z$n
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 5
+  servlet:
+    multipart:
+      max-request-size: -1
+      max-file-size: -1
+server:
+  port: 8082
+  ssl:
+    key-store: classpath:clever-bell.5-250-184-231.plesk.page_fullchain_and_key.p12
+    key-store-password: 123456
+    keyStoreType: PKCS12
+logging:
+    level:
+        root: INFO
+    file:
+        name: /tmp/reaktor_printersServer.log
+        max-size: 1MB
+        max-history: 10
+        total-size-cap: 10MB

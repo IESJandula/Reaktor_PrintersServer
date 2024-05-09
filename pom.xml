@@ -41,6 +41,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Utilidades comunes a todos los servidores -->
+        <dependency>
+			<groupId>es.iesjandula.base</groupId>
+			<artifactId>BaseServer</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
