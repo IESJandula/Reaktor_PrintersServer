@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,22 @@ import lombok.extern.slf4j.Slf4j;
 public class PrinterRest
 {
 
+	/*Fechas:
+	desde ayer
+	desde 3 días atrás
+	desde la semana pasada
+	desde el mes pasado
+	todos
+	Estado:
+	Por cualquier estado
+	O todos*/
+	
+	public static final int ONE_DAY_TIME = 0;
+	public static final int THREE_DAYS_TIME = 1;
+	public static final int ONE_WEEK_TIME = 2;
+	public static final int ONE_MONTH_TIME = 3;
+	public static final int ALL_TIME = 4;
+	
 	@Autowired
 	private IPrinterRepository printerRepository;
 
@@ -401,6 +418,193 @@ public class PrinterRest
 		}
 	}
 
+	
+	
+	
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/admin/delete/print_actions")
+	public ResponseEntity<?> deletePrintActions(
+			@RequestParam(required = false) Integer numCopies,
+			@RequestParam(required = false) Integer date,
+			@RequestParam(required = false) String color,
+			@RequestParam(required = false) String faces,
+			@RequestParam(required = false) String orientation,
+			@RequestParam(required = false) String printerName,
+			@RequestParam(required = false) String user, 
+			@RequestParam(required = false) String status)
+	{
+		try
+		{	
+			
+			List<PrintAction> actions = this.printActionRepository.findAll();
+			
+			if (user != null && !user.equals(""))
+			{
+				log.info( "User:" + user);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getUser().equals(user)) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (status != null && !status.equals(""))
+			{
+				log.info( "Status:" + status);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getStatus().equals(status)) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (printerName != null && !printerName.equals(""))
+			{
+				log.info( "Printer:" + printerName);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getPrinterName().equals(printerName)) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (date != null && !date.equals(""))
+			{
+				log.info( "date:" + date);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				Date d = this.selectDeteleDays(date);
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getDate().before(d)) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (numCopies != null)
+			{
+				
+				log.info( "numCopies:" + numCopies);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getNumCopies() == numCopies) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (color != null && !color.equals(""))
+			{
+				log.info( "color:" + color);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getColor().equals(color)) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (faces != null && !faces.equals(""))
+			{
+				log.info( "faces:" + faces);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getFaces().equals(faces)) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			if (orientation != null && !orientation.equals(""))
+			{
+				log.info( "orientation:" + orientation);
+				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
+				
+				for (PrintAction printAction : actions)
+				{
+					if(printAction.getOrientation().equals(orientation)) {
+						filteredActions.add(printAction);
+					}
+				}
+				actions = filteredActions;
+			}
+			
+			for (PrintAction printAction : actions)
+			{
+				File file = new File(this.filePath + File.separator +printAction.getId()+ File.separator +printAction.getFileName());
+				file.delete();
+				file = new File(this.filePath + File.separator +printAction.getId());
+				file.delete();
+				this.printActionRepository.delete(printAction);
+			}
+			
+			return ResponseEntity.ok().build();
+			
+		} catch (Exception exception)
+		{
+			String error = "Error deleting the printersActions";
+			log.error(error, exception);
+			return ResponseEntity.status(500).build();
+		}
+	}
+	
+	
+	private Date selectDeteleDays (Integer selection) 
+	{
+		
+		Date date = new Date();
+		
+		Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date); 
+
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+		
+		switch (selection)
+		{
+			case PrinterRest.ONE_DAY_TIME:
+			{
+				calendar.add(Calendar.DAY_OF_MONTH, -1);
+			}
+			case PrinterRest.THREE_DAYS_TIME:
+			{
+				calendar.add(Calendar.DAY_OF_MONTH, -3);
+			}
+			case PrinterRest.ONE_WEEK_TIME:
+			{
+				calendar.add(Calendar.DAY_OF_MONTH, -7);
+			}
+			case PrinterRest.ONE_MONTH_TIME:
+			{
+				calendar.add(Calendar.MONTH, -1);
+			}
+		}
+		return calendar.getTime();
+	}
+	
 	/**
 	 * Method writeText
 	 * 
