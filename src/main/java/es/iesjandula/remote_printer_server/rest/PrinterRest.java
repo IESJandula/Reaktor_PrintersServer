@@ -28,8 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import es.iesjandula.remote_printer_server.models.PrintAction;
 import es.iesjandula.remote_printer_server.models.Printer;
+import es.iesjandula.remote_printer_server.models.User;
 import es.iesjandula.remote_printer_server.repository.IPrintActionRepository;
 import es.iesjandula.remote_printer_server.repository.IPrinterRepository;
+import es.iesjandula.remote_printer_server.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -59,6 +61,9 @@ public class PrinterRest
 
 	@Autowired
 	private IPrintActionRepository printActionRepository;
+	
+	@Autowired
+	private IUserRepository userRepository;
 
 	private String filePath = "." + File.separator + "files" + File.separator;
 
@@ -129,6 +134,58 @@ public class PrinterRest
 			return ResponseEntity.status(500).build();
 		}
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/get/users")
+	public ResponseEntity<?> getUsers()
+	{
+		try
+		{
+			List<String> listUsers = new ArrayList<String>();
+
+			List<User> availablePrinters = this.userRepository.findAll();
+
+			for (User user : availablePrinters)
+			{
+				listUsers.add(user.getUsername());
+			}
+
+			return ResponseEntity.ok().body(listUsers);
+		} catch (Exception exception)
+		{
+			String error = "Error getting the users";
+			log.error(error, exception);
+			return ResponseEntity.status(500).build();
+		}
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/login")
+	public ResponseEntity<?> evaluateUser(
+			@RequestParam(required = true) String username,
+			@RequestParam(required = true) String password)
+	{
+		try
+		{
+			Optional<User> optional = this.userRepository.findById(username);
+
+			if (optional.isPresent() && optional.get().getPassword().equals(password))
+			{
+				if(optional.get().isAdmin()) {
+					return ResponseEntity.ok().body("admin");
+				}else {
+					return ResponseEntity.ok().body("");
+				}
+			}else {
+				return ResponseEntity.status(412).body("Incorrect username or password");
+			}
+		} catch (Exception exception)
+		{
+			String error = "Error getting the users";
+			log.error(error, exception);
+			return ResponseEntity.status(500).build();
+		}
+	}
+
+	
 
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
 	public ResponseEntity<?> printPDF(@RequestParam(required = true) String printerName,
@@ -418,9 +475,7 @@ public class PrinterRest
 		}
 	}
 
-	
-	
-	
+		
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/delete/print_actions")
 	public ResponseEntity<?> deletePrintActions(
