@@ -50,11 +50,11 @@ public class PrinterRest
 	Por cualquier estado
 	O todos*/
 	
-	public static final int ONE_DAY_TIME = 0;
-	public static final int THREE_DAYS_TIME = 1;
-	public static final int ONE_WEEK_TIME = 2;
-	public static final int ONE_MONTH_TIME = 3;
-	public static final int ALL_TIME = 4;
+	public static final String ONE_DAY_TIME = "0";
+	public static final String THREE_DAYS_TIME = "1";
+	public static final String ONE_WEEK_TIME = "2";
+	public static final String ONE_MONTH_TIME = "3";
+	public static final String ALL_TIME = "4";
 	
 	@Autowired
 	private IPrinterRepository printerRepository;
@@ -184,8 +184,6 @@ public class PrinterRest
 			return ResponseEntity.status(500).build();
 		}
 	}
-
-	
 
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
 	public ResponseEntity<?> printPDF(@RequestParam(required = true) String printerName,
@@ -399,7 +397,7 @@ public class PrinterRest
 				
 				for (PrintAction printAction : actions)
 				{
-					if(printAction.getDate().equals(date)) {
+					if(printAction.getDate().equals(d)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -475,37 +473,15 @@ public class PrinterRest
 		}
 	}
 
-		
-	
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/delete/print_actions")
 	public ResponseEntity<?> deletePrintActions(
-			@RequestParam(required = false) Integer numCopies,
-			@RequestParam(required = false) Integer date,
-			@RequestParam(required = false) String color,
-			@RequestParam(required = false) String faces,
-			@RequestParam(required = false) String orientation,
-			@RequestParam(required = false) String printerName,
-			@RequestParam(required = false) String user, 
+			@RequestParam(required = false) String date,
 			@RequestParam(required = false) String status)
 	{
 		try
 		{	
 			
 			List<PrintAction> actions = this.printActionRepository.findAll();
-			
-			if (user != null && !user.equals(""))
-			{
-				log.info( "User:" + user);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getUser().equals(user)) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
 			
 			if (status != null && !status.equals(""))
 			{
@@ -515,20 +491,6 @@ public class PrinterRest
 				for (PrintAction printAction : actions)
 				{
 					if(printAction.getStatus().equals(status)) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
-			
-			if (printerName != null && !printerName.equals(""))
-			{
-				log.info( "Printer:" + printerName);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getPrinterName().equals(printerName)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -545,63 +507,6 @@ public class PrinterRest
 				for (PrintAction printAction : actions)
 				{
 					if(printAction.getDate().before(d)) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
-			
-			if (numCopies != null)
-			{
-				
-				log.info( "numCopies:" + numCopies);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getNumCopies() == numCopies) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
-			
-			if (color != null && !color.equals(""))
-			{
-				log.info( "color:" + color);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getColor().equals(color)) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
-			
-			if (faces != null && !faces.equals(""))
-			{
-				log.info( "faces:" + faces);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getFaces().equals(faces)) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
-			
-			if (orientation != null && !orientation.equals(""))
-			{
-				log.info( "orientation:" + orientation);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getOrientation().equals(orientation)) {
 						filteredActions.add(printAction);
 					}
 				}
@@ -626,9 +531,8 @@ public class PrinterRest
 			return ResponseEntity.status(500).build();
 		}
 	}
-	
-	
-	private Date selectDeteleDays (Integer selection) 
+		
+	private Date selectDeteleDays (String selection) 
 	{
 		
 		Date date = new Date();
