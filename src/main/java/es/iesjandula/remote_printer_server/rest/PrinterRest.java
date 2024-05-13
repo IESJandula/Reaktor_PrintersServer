@@ -114,16 +114,10 @@ public class PrinterRest
 	{
 		try
 		{
-			List<String> listPrinters = new ArrayList<String>();
 
 			List<Printer> availablePrinters = this.printerRepository.findAll();
 
-			for (Printer printer : availablePrinters)
-			{
-				listPrinters.add(printer.getName());
-			}
-
-			return ResponseEntity.ok().body(listPrinters);
+			return ResponseEntity.ok().body(availablePrinters);
 		} catch (Exception exception)
 		{
 			String error = "Error getting the printers";
