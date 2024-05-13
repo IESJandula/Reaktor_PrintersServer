@@ -68,15 +68,12 @@ public class PrinterRest
 	private String filePath = "." + File.separator + "files" + File.separator;
 
 	@RequestMapping(method = RequestMethod.POST, value = "/send/printers", consumes = "application/json")
-	public ResponseEntity<?> sendPrinters(@RequestBody(required = true) List<String> listPrinters)
+	public ResponseEntity<?> sendPrinters(@RequestBody(required = true) List<Printer> listPrinters)
 	{
 		try
 		{
-			for (String printer : listPrinters)
-			{
-				this.printerRepository.saveAndFlush(new Printer(printer));
-			}
-
+			this.printerRepository.saveAllAndFlush(listPrinters);
+			
 			return ResponseEntity.ok().build();
 		} catch (Exception exception)
 		{
