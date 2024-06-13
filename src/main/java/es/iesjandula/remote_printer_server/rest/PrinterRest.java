@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,10 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import es.iesjandula.remote_printer_server.models.PrintAction;
 import es.iesjandula.remote_printer_server.models.Printer;
-import es.iesjandula.remote_printer_server.models.User;
 import es.iesjandula.remote_printer_server.repository.IPrintActionRepository;
 import es.iesjandula.remote_printer_server.repository.IPrinterRepository;
-import es.iesjandula.remote_printer_server.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -40,16 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PrinterRest
 {
 
-	/*Fechas:
-	desde ayer
-	desde 3 días atrás
-	desde la semana pasada
-	desde el mes pasado
-	todos
-	Estado:
-	Por cualquier estado
-	O todos*/
-	
 	public static final String ONE_DAY_TIME = "0";
 	public static final String THREE_DAYS_TIME = "1";
 	public static final String ONE_WEEK_TIME = "2";
@@ -61,12 +48,15 @@ public class PrinterRest
 
 	@Autowired
 	private IPrintActionRepository printActionRepository;
-	
-	@Autowired
-	private IUserRepository userRepository;
 
 	private String filePath = "." + File.separator + "files" + File.separator;
 
+	
+	/**
+	 * Endpoint que guarda las impresoras guardadas en base de datos
+	 * @param listPrinters
+	 * @return ok si se guarda correctamente
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/send/printers", consumes = "application/json")
 	public ResponseEntity<?> sendPrinters(@RequestBody(required = true) List<Printer> listPrinters)
 	{
@@ -83,6 +73,11 @@ public class PrinterRest
 		}
 	}
 	
+	/**
+	 * Endpoint que devuelve el contenido del documento de la printAction dada mediante una id 
+	 * @param id
+	 * @return los bytes del documento
+	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/get/document", produces = "multipart/form-data")
 	public ResponseEntity<?> getDocument(@RequestParam(required = true) Long id)
 	{
@@ -109,6 +104,10 @@ public class PrinterRest
 		}
 	}
 
+	/**
+	 * Devuelve las impresoras guardadas en base de datos
+	 * @return la lista de impresoras
+	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/get/printers")
 	public ResponseEntity<?> getPrinters()
 	{
@@ -125,57 +124,18 @@ public class PrinterRest
 			return ResponseEntity.status(500).build();
 		}
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/get/users")
-	public ResponseEntity<?> getUsers()
-	{
-		try
-		{
-			List<String> listUsers = new ArrayList<String>();
 
-			List<User> availablePrinters = this.userRepository.findAll();
-
-			for (User user : availablePrinters)
-			{
-				listUsers.add(user.getUsername());
-			}
-
-			return ResponseEntity.ok().body(listUsers);
-		} catch (Exception exception)
-		{
-			String error = "Error getting the users";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
-		}
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/login")
-	public ResponseEntity<?> evaluateUser(
-			@RequestParam(required = true) String username,
-			@RequestParam(required = true) String password)
-	{
-		try
-		{
-			Optional<User> optional = this.userRepository.findById(username);
-
-			if (optional.isPresent() && optional.get().getPassword().equals(password))
-			{
-				if(optional.get().isAdmin()) {
-					return ResponseEntity.ok().body("admin");
-				}else {
-					return ResponseEntity.ok().body("");
-				}
-			}else {
-				return ResponseEntity.status(412).body("Incorrect username or password");
-			}
-		} catch (Exception exception)
-		{
-			String error = "Error getting the users";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
-		}
-	}
-
+	/**
+	 * Guarda en base de datos la peticion de impresion realizada desde la web y guarda el documento en el servidor
+	 * @param printerName
+	 * @param numCopies
+	 * @param orientation
+	 * @param color
+	 * @param faces
+	 * @param user
+	 * @param file
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
 	public ResponseEntity<?> printPDF(@RequestParam(required = true) String printerName,
 			@RequestParam(required = true) Integer numCopies, @RequestParam(required = true) String orientation,
@@ -185,7 +145,7 @@ public class PrinterRest
 		try
 		{
 			PrintAction printAction = new PrintAction();
-
+			//Crea el objeto printAction con la configuracion mandada
 			Date date = new Date();
 			printAction.setPrinterName(printerName);
 			printAction.setFileName(file.getOriginalFilename());
@@ -200,6 +160,7 @@ public class PrinterRest
 
 			List<PrintAction> actions = this.printActionRepository.findByUserAndDate(user, date);
 			
+			//Guarda el fichero en el servidor
 			File folder = new File(this.filePath + File.separator + actions.get(0).getId());
 			
 			folder.mkdir();
@@ -216,6 +177,10 @@ public class PrinterRest
 
 	}
 
+	/**
+	 * Configura y envia a la maquina cliente la informacion para realizar la impresion
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/get/prints")
 	public ResponseEntity<?> sendPrintAction()
 	{
@@ -243,7 +208,7 @@ public class PrinterRest
 						new java.io.ByteArrayInputStream(contenidoDelFichero));
 
 				HttpHeaders headers = new HttpHeaders();
-
+				//Introducimos por header los parametros de la impresion
 				headers.set("Content-Disposition", "attachment; filename=" + file.getName());
 				headers.set("numCopies", "" + printAction.getNumCopies());
 				headers.set("printerName", printAction.getPrinterName());
@@ -287,6 +252,12 @@ public class PrinterRest
 		}
 	}
 	
+	/**
+	 * Obtiene la información de la maquina cliente de como se ha finalizado una printAction
+	 * @param id
+	 * @param status
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/get/print/status")
 	public ResponseEntity<?> getPrintFinalization(
 			@RequestHeader(name = "id") String id,
@@ -319,6 +290,18 @@ public class PrinterRest
 		}
 	}
 	
+	/**
+	 * Devuelve las impresiones filtradas por los parametros pasados como parametro, si no se envia ninguno manda todos
+	 * @param numCopies
+	 * @param date
+	 * @param color
+	 * @param faces
+	 * @param orientation
+	 * @param printerName
+	 * @param user
+	 * @param status
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/get/user/prints")
 	public ResponseEntity<?> getUserPrints(
 			@RequestParam(required = false) Integer numCopies,
@@ -464,6 +447,12 @@ public class PrinterRest
 		}
 	}
 
+	/**
+	 * Elimina las printActions en base a 2 parametros, fecha y el status en el que se encuetra
+	 * @param date
+	 * @param status
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/admin/delete/print_actions")
 	public ResponseEntity<?> deletePrintActions(
 			@RequestParam(required = false) String date,
@@ -523,6 +512,11 @@ public class PrinterRest
 		}
 	}
 		
+	/**
+	 * Metodo que calcula hasta que dia se debe borrar las printAction
+	 * @param selection
+	 * @return
+	 */
 	private Date selectDeteleDays (String selection) 
 	{
 		
@@ -556,7 +550,7 @@ public class PrinterRest
 	}
 	
 	/**
-	 * Method writeText
+	 * Escribe un fichero en la ruta seleccionada
 	 * 
 	 * @param name
 	 * @param content
