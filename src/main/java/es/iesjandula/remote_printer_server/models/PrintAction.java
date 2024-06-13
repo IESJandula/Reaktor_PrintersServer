@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class PrintAction
 {
-
 	/** CONSTANTE - TO DO */
 	public final static String TO_DO = "to do";
 	
@@ -61,5 +60,4 @@ public class PrintAction
 	
 	@Column
 	private Date date;
-	
 }
