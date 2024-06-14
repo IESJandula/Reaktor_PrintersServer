@@ -62,6 +62,7 @@ public class PrinterRest
 	{
 		try
 		{
+			this.printerRepository.deleteAll();
 			this.printerRepository.saveAllAndFlush(listPrinters);
 			
 			return ResponseEntity.ok().build();
