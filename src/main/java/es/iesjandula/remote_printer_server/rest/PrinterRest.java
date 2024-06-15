@@ -161,6 +161,12 @@ public class PrinterRest
 
 			List<PrintAction> actions = this.printActionRepository.findByUserAndDate(user, date);
 			
+			File fileFolder = new File(this.filePath);
+	    	if(!fileFolder.exists()) 
+	    	{
+	    		fileFolder.mkdir();
+	    	}
+			
 			//Guarda el fichero en el servidor
 			File folder = new File(this.filePath + File.separator + actions.get(0).getId());
 			
