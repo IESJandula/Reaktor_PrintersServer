@@ -1,7 +1,7 @@
 spring:
   jpa.hibernate.ddl-auto: none
   datasource:
-    url: jdbc:mysql://localhost:3306/reaktor_timetableserver
+    url: jdbc:mysql://localhost:3306/reaktor_printerserver
     username: root
     password: toor
     hikari:
@@ -13,3 +13,4 @@ spring:
       max-file-size: -1
 server:
   port: 8082
+urlCors: http://localhost:5173
