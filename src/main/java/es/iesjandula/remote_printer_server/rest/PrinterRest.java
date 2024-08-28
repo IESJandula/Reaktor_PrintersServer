@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import es.iesjandula.remote_printer_server.dto.RequestDtoPrintQuery;
 import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
+import es.iesjandula.remote_printer_server.dto.ResponseDtoPrinters;
 import es.iesjandula.remote_printer_server.models.PrintAction;
 import es.iesjandula.remote_printer_server.models.Printer;
 import es.iesjandula.remote_printer_server.repository.IPrintActionRepository;
@@ -82,19 +83,20 @@ public class PrinterRest
 	 * @return la lista de impresoras
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/get/printers")
-	public ResponseEntity<?> getPrinters()
+	public ResponseEntity<?> obtenerImpresoras()
 	{
 		try
 		{
-			List<Printer> availablePrinters = this.printerRepository.findAll() ;
-
-			return ResponseEntity.ok().body(availablePrinters) ;
+			return ResponseEntity.ok().body(this.printerRepository.getPrinters()) ;
 		}
-			catch (Exception exception)
+		catch (Exception exception)
 		{
-			String error = "Error getting the printers";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
+					  Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
+					  exception) ;
+
+			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
 
@@ -301,10 +303,8 @@ public class PrinterRest
 										 												  Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones",
 										 												  exception) ;
 	        
-			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "consultaCursos", printersServerException) ;
+			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
-	        
-	        
 	    }
 	}
 

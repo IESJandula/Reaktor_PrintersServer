@@ -21,11 +21,11 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 			 																		 "p.copies, p.color, p.orientation, p.sides, p.date) "   +
 		   "FROM PrintAction p " +
 		   "WHERE " +
-				"(:user IS NULL OR p.user = :user) AND " 			   +
-				"(:printer IS NULL OR p.printer = :printer) AND " +
-				"(:status IS NULL OR p.status = :status) AND " 	   +
-				"(:startDate IS NULL OR p.date >= :startDate) AND "   +
-				"(:endDate IS NULL OR p.date <= :endDate) " 		   +
+				"(:user IS NULL OR p.user = :user) AND " 			+
+				"(:printer IS NULL OR p.printer = :printer) AND "   +
+				"(:status IS NULL OR p.status = :status) AND " 	    +
+				"(:startDate IS NULL OR p.date >= :startDate) AND " +
+				"(:endDate IS NULL OR p.date <= :endDate) " 		+
 		   "ORDER BY p.date DESC")
 	List<ResponseDtoPrintAction> findPrintActions(@Param("user") String user,
 												  @Param("printer") String printer,
