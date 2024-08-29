@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import es.iesjandula.remote_printer_server.dto.RequestDtoPrintQuery;
 import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
-import es.iesjandula.remote_printer_server.dto.ResponseDtoPrinters;
 import es.iesjandula.remote_printer_server.models.PrintAction;
 import es.iesjandula.remote_printer_server.models.Printer;
 import es.iesjandula.remote_printer_server.repository.IPrintActionRepository;
@@ -99,6 +98,42 @@ public class PrinterRest
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
+	
+	/**
+	 * @return la lista de estados disponibles
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/get/states")
+	public ResponseEntity<List<String>> obtenerEstados()
+	{
+		return ResponseEntity.ok().body(Constants.STATES_LIST) ;
+	}
+	
+	/**
+	 * @return la lista de orientaciones disponibles
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/get/orientations")
+	public ResponseEntity<List<String>> obtenerOrientaciones()
+	{
+		return ResponseEntity.ok().body(Constants.ORIENTATIONS_LIST) ;
+	}
+	
+	/**
+	 * @return la lista de colores disponibles
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/get/colors")
+	public ResponseEntity<List<String>> obtenerColores()
+	{
+		return ResponseEntity.ok().body(Constants.COLORS_LIST) ;
+	}
+	
+	/**
+	 * @return la lista de caras disponibles
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/get/sides")
+	public ResponseEntity<List<String>> obtenerCaras()
+	{
+		return ResponseEntity.ok().body(Constants.SIDES_LIST) ;
+	}
 
 	/**
 	 * Guarda en base de datos la peticion de impresion realizada desde la web y guarda el documento en el servidor
@@ -124,7 +159,7 @@ public class PrinterRest
 			
 			printAction.setUser(user) ;
 			printAction.setPrinter(printer) ;
-			printAction.setStatus(Constants.TO_DO) ;
+			printAction.setStatus(Constants.STATE_TODO) ;
 			printAction.setFileName(file.getOriginalFilename()) ;
 			printAction.setCopies(numCopies) ;
 			printAction.setColor(color) ;
@@ -171,7 +206,7 @@ public class PrinterRest
 		try
 		{
 
-			List<PrintAction> actions = this.printActionRepository.findByStatus(Constants.TO_DO);
+			List<PrintAction> actions = this.printActionRepository.findByStatus(Constants.STATE_TODO);
 
 			if (!actions.isEmpty())
 			{
@@ -181,7 +216,7 @@ public class PrinterRest
 				// --- OBTENEMOS LA PRIMERA TASK ---
 				PrintAction printAction = actions.get(0);
 
-				printAction.setStatus(Constants.SEND);
+				printAction.setStatus(Constants.STATE_SEND);
 				this.printActionRepository.saveAndFlush(printAction);
 
 				File file = new File(this.filePath + File.separator +printAction.getId()+ File.separator + printAction.getFileName());
@@ -252,12 +287,12 @@ public class PrinterRest
 			Optional<PrintAction> action = this.printActionRepository.findById(Long.valueOf(id));	
 			if (action.isPresent())
 			{
-				if (status.equalsIgnoreCase(Constants.DONE))
+				if (status.equalsIgnoreCase(Constants.STATE_DONE))
 				{
-					action.get().setStatus(Constants.DONE);
+					action.get().setStatus(Constants.STATE_DONE);
 				}else 
 				{
-					action.get().setStatus(Constants.ERROR);
+					action.get().setStatus(Constants.STATE_ERROR);
 				}
 				this.printActionRepository.saveAndFlush(action.get());
 				return ResponseEntity.ok().build();
