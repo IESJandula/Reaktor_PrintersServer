@@ -11,6 +11,11 @@ spring:
     multipart:
       max-request-size: -1
       max-file-size: -1
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 server:
   port: 8082
-urlCors: http://localhost:5173
+urlCors: http://localhost:5173, http://192.168.1.209:5173

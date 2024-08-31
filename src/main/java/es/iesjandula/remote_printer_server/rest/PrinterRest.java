@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.ParseException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,6 +18,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -25,8 +30,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import es.iesjandula.remote_printer_server.dto.RequestDtoPrintQuery;
 import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
+import es.iesjandula.remote_printer_server.models.DiaFestivo;
 import es.iesjandula.remote_printer_server.models.PrintAction;
 import es.iesjandula.remote_printer_server.models.Printer;
+import es.iesjandula.remote_printer_server.repository.IDiaFestivoRepository;
 import es.iesjandula.remote_printer_server.repository.IPrintActionRepository;
 import es.iesjandula.remote_printer_server.repository.IPrinterRepository;
 import es.iesjandula.remote_printer_server.util.Constants;
@@ -51,6 +58,9 @@ public class PrinterRest
 
 	@Autowired
 	private IPrintActionRepository printActionRepository;
+	
+	@Autowired
+	private IDiaFestivoRepository diaFestivoRepository ;
 
 	private String filePath = "." + File.separator + "files" + File.separator;
 
@@ -134,6 +144,59 @@ public class PrinterRest
 	{
 		return ResponseEntity.ok().body(Constants.SIDES_LIST) ;
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/validations")
+	public ResponseEntity<?> validacionesGlobalesPreviasImpresion()
+	{
+		String outcome = "" ;
+		
+	    // Obtener la fecha y hora actual
+	    LocalDate fechaActual = LocalDate.now() ;
+	    DayOfWeek diaActual   = fechaActual.getDayOfWeek() ;
+	    LocalTime horaActual  = LocalTime.now() ;
+
+	    // Verificamos si es fuera del horario permitido (antes de las 8 o después de las 20 de lunes a viernes)
+	    if (diaActual == DayOfWeek.SATURDAY || diaActual == DayOfWeek.SUNDAY || horaActual.isBefore(LocalTime.of(8, 0)) || horaActual.isAfter(LocalTime.of(20, 0)))
+	    {
+	    	outcome = "Impresión no permitida. Solo activa de lunes a viernes de 8:00 a 20:00" ;
+	    }
+	    
+	    if (outcome.isEmpty())
+	    {
+	    	try
+	    	{
+	    		// Convertimos LocalDate a Date usando el método de utilidad
+	    		Date fechaActualDate = ConversorFechasHoras.convertirLocalDateToDate(fechaActual) ;
+	    		
+	    		// Verificamos si es un día festivo
+	    		Optional<DiaFestivo> diaFestivoOptional = diaFestivoRepository.findByFecha(fechaActualDate);
+	    		
+	    		if (diaFestivoOptional.isPresent())
+	    		{
+	    			DiaFestivo diaFestivo = diaFestivoOptional.get() ;
+	    			outcome = "Impresión no permitida. Hoy es día festivo: " + diaFestivo.getDescripcion() ;
+	    		}
+	    	}
+	    	catch (ParseException parseException)
+	    	{
+	    		outcome = "Error al leer los festivos: " + parseException.getMessage() ;	
+	    	}	    	
+	    }
+
+	    if (!outcome.isEmpty())
+	    {
+	    	// Añadimos UTF-8 para las tildes
+		    HttpHeaders headers = new HttpHeaders();
+		    headers.set("Content-Type", "application/json; charset=UTF-8") ;
+	    	
+		    return new ResponseEntity<String>(outcome, headers, HttpStatus.BAD_REQUEST) ;
+	    }
+
+	    // Si todo va bien, se devuelve un 200
+	    return ResponseEntity.ok().build() ;
+	}
+
+
 
 	/**
 	 * Guarda en base de datos la peticion de impresion realizada desde la web y guarda el documento en el servidor

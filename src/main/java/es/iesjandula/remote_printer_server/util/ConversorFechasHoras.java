@@ -2,6 +2,8 @@ package es.iesjandula.remote_printer_server.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -28,4 +30,22 @@ public class ConversorFechasHoras
 		
 		return outcome ;
 	}
+	
+    /**
+     * @param localDate LocalDate que se desea convertir
+     * @return Date convertido a partir de LocalDate
+	 * @throws ParseException excepción al parsear el String
+     */
+    public static Date convertirLocalDateToDate(LocalDate localDate) throws ParseException 
+    {
+        Date outcome = null;
+        
+        if (localDate != null)
+        {
+            String formattedDate = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ;
+            outcome = DATE_FORMAT.parse(formattedDate) ;
+        }
+
+        return outcome;
+    }
 }
