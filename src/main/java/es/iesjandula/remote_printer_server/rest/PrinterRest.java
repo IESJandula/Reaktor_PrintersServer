@@ -36,9 +36,9 @@ import es.iesjandula.remote_printer_server.models.Printer;
 import es.iesjandula.remote_printer_server.repository.IDiaFestivoRepository;
 import es.iesjandula.remote_printer_server.repository.IPrintActionRepository;
 import es.iesjandula.remote_printer_server.repository.IPrinterRepository;
-import es.iesjandula.remote_printer_server.util.Constants;
-import es.iesjandula.remote_printer_server.util.ConversorFechasHoras;
-import es.iesjandula.remote_printer_server.util.PrintersServerException;
+import es.iesjandula.remote_printer_server.utils.Constants;
+import es.iesjandula.remote_printer_server.utils.ConversorFechasHoras;
+import es.iesjandula.remote_printer_server.utils.PrintersServerException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController

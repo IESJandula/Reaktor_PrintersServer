@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.util;
+package es.iesjandula.remote_printer_server.utils;
 
 import java.util.HashMap;
 import java.util.Map;

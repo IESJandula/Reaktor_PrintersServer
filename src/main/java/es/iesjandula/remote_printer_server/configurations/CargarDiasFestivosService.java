@@ -15,9 +15,9 @@ import org.springframework.util.ResourceUtils;
 
 import es.iesjandula.remote_printer_server.models.DiaFestivo;
 import es.iesjandula.remote_printer_server.repository.IDiaFestivoRepository;
-import es.iesjandula.remote_printer_server.util.ConversorFechasHoras;
-import es.iesjandula.remote_printer_server.util.PrintersServerException;
-import es.iesjandula.remote_printer_server.utils.Constants ;
+import es.iesjandula.remote_printer_server.utils.Constants;
+import es.iesjandula.remote_printer_server.utils.ConversorFechasHoras;
+import es.iesjandula.remote_printer_server.utils.PrintersServerException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
