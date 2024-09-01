@@ -1,16 +1,13 @@
 package es.iesjandula.remote_printer_server.rest;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import es.iesjandula.remote_printer_server.configurations.InicializacionCarpetas;
+import es.iesjandula.remote_printer_server.dto.DtoPrinters;
 import es.iesjandula.remote_printer_server.dto.RequestDtoPrintQuery;
 import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
 import es.iesjandula.remote_printer_server.models.DiaFestivo;
@@ -42,19 +41,15 @@ import es.iesjandula.remote_printer_server.utils.PrintersServerException;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/printers")
 @Slf4j
 public class PrinterRest
 {
-
-	public static final String ONE_DAY_TIME = "0";
-	public static final String THREE_DAYS_TIME = "1";
-	public static final String ONE_WEEK_TIME = "2";
-	public static final String ONE_MONTH_TIME = "3";
-	public static final String ALL_TIME = "4";
+    @Autowired
+    private InicializacionCarpetas inicializacionCarpetas ;
 	
 	@Autowired
-	private IPrinterRepository printerRepository;
+	private IPrinterRepository printerRepository ;
 
 	@Autowired
 	private IPrintActionRepository printActionRepository;
@@ -62,36 +57,11 @@ public class PrinterRest
 	@Autowired
 	private IDiaFestivoRepository diaFestivoRepository ;
 
-	private String filePath = "." + File.separator + "files" + File.separator;
-
-	
-	/**
-	 * Endpoint que guarda las impresoras guardadas en base de datos
-	 * @param listPrinters
-	 * @return ok si se guarda correctamente
-	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/send/printers", consumes = "application/json")
-	public ResponseEntity<?> sendPrinters(@RequestBody(required = true) List<Printer> listPrinters)
-	{
-		try
-		{
-			this.printerRepository.deleteAll();
-			this.printerRepository.saveAllAndFlush(listPrinters);
-			
-			return ResponseEntity.ok().build();
-		} catch (Exception exception)
-		{
-			String error = "Error getting the printers";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
-		}
-	}
-
 	/**
 	 * Devuelve las impresoras guardadas en base de datos
 	 * @return la lista de impresoras
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/get/printers")
+	@RequestMapping(method = RequestMethod.GET, value = "/web/printers")
 	public ResponseEntity<?> obtenerImpresoras()
 	{
 		try
@@ -112,7 +82,7 @@ public class PrinterRest
 	/**
 	 * @return la lista de estados disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/get/states")
+	@RequestMapping(method = RequestMethod.GET, value = "/web/states")
 	public ResponseEntity<List<String>> obtenerEstados()
 	{
 		return ResponseEntity.ok().body(Constants.STATES_LIST) ;
@@ -121,7 +91,7 @@ public class PrinterRest
 	/**
 	 * @return la lista de orientaciones disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/get/orientations")
+	@RequestMapping(method = RequestMethod.GET, value = "/web/orientations")
 	public ResponseEntity<List<String>> obtenerOrientaciones()
 	{
 		return ResponseEntity.ok().body(Constants.ORIENTATIONS_LIST) ;
@@ -130,7 +100,7 @@ public class PrinterRest
 	/**
 	 * @return la lista de colores disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/get/colors")
+	@RequestMapping(method = RequestMethod.GET, value = "/web/colors")
 	public ResponseEntity<List<String>> obtenerColores()
 	{
 		return ResponseEntity.ok().body(Constants.COLORS_LIST) ;
@@ -139,13 +109,13 @@ public class PrinterRest
 	/**
 	 * @return la lista de caras disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/get/sides")
+	@RequestMapping(method = RequestMethod.GET, value = "/web/sides")
 	public ResponseEntity<List<String>> obtenerCaras()
 	{
 		return ResponseEntity.ok().body(Constants.SIDES_LIST) ;
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/validations")
+	@RequestMapping(method = RequestMethod.GET, value = "/web/validations")
 	public ResponseEntity<?> validacionesGlobalesPreviasImpresion()
 	{
 		String outcome = "" ;
@@ -169,7 +139,7 @@ public class PrinterRest
 	    		Date fechaActualDate = ConversorFechasHoras.convertirLocalDateToDate(fechaActual) ;
 	    		
 	    		// Verificamos si es un día festivo
-	    		Optional<DiaFestivo> diaFestivoOptional = diaFestivoRepository.findByFecha(fechaActualDate);
+	    		Optional<DiaFestivo> diaFestivoOptional = this.diaFestivoRepository.findByFecha(fechaActualDate);
 	    		
 	    		if (diaFestivoOptional.isPresent())
 	    		{
@@ -195,189 +165,13 @@ public class PrinterRest
 	    // Si todo va bien, se devuelve un 200
 	    return ResponseEntity.ok().build() ;
 	}
-
-
-
-	/**
-	 * Guarda en base de datos la peticion de impresion realizada desde la web y guarda el documento en el servidor
-	 * @param printer
-	 * @param numCopies
-	 * @param orientation
-	 * @param color
-	 * @param faces
-	 * @param user
-	 * @param file
-	 * @return
-	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
-	public ResponseEntity<?> printPDF(@RequestParam(required = true) String printer,
-			@RequestParam(required = true) Integer numCopies, @RequestParam(required = true) String orientation,
-			@RequestParam(required = true) String color,@RequestParam(required = true) String faces,
-			@RequestParam(required = true) String user,@RequestBody(required = true) MultipartFile file)
-	{
-		try
-		{
-			// Creamos el objeto printAction con la configuracion recibida
-			PrintAction printAction = new PrintAction();
-			
-			printAction.setUser(user) ;
-			printAction.setPrinter(printer) ;
-			printAction.setStatus(Constants.STATE_TODO) ;
-			printAction.setFileName(file.getOriginalFilename()) ;
-			printAction.setCopies(numCopies) ;
-			printAction.setColor(color) ;
-			printAction.setOrientation(orientation) ;
-			printAction.setSides(faces) ;
-			
-			Date date = new Date() ;
-			printAction.setDate(date) ;
-			
-			this.printActionRepository.saveAndFlush(printAction) ;
-
-			List<PrintAction> actions = this.printActionRepository.findByUserAndDate(user, date);
-			
-			File fileFolder = new File(this.filePath);
-	    	if(!fileFolder.exists()) 
-	    	{
-	    		fileFolder.mkdir();
-	    	}
-			
-			//Guarda el fichero en el servidor
-			File folder = new File(this.filePath + File.separator + actions.get(0).getId());
-			
-			folder.mkdir();
-			
-			this.writeText(this.filePath + File.separator + actions.get(0).getId() + File.separator + printAction.getFileName(), file.getBytes());
-
-			return ResponseEntity.ok().build();
-		} catch (Exception exception)
-		{
-			String error = "Error getting the printers";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
-		}
-
-	}
-
-	/**
-	 * Configura y envia a la maquina cliente la informacion para realizar la impresion
-	 * @return
-	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/get/prints")
-	public ResponseEntity<?> sendPrintAction()
-	{
-		try
-		{
-
-			List<PrintAction> actions = this.printActionRepository.findByStatus(Constants.STATE_TODO);
-
-			if (!actions.isEmpty())
-			{
-				// --- ORDENAMOS LAS FECHAS ---
-				actions.sort((o1, o2) -> o1.getDate().compareTo(o2.getDate()));
-
-				// --- OBTENEMOS LA PRIMERA TASK ---
-				PrintAction printAction = actions.get(0);
-
-				printAction.setStatus(Constants.STATE_SEND);
-				this.printActionRepository.saveAndFlush(printAction);
-
-				File file = new File(this.filePath + File.separator +printAction.getId()+ File.separator + printAction.getFileName());
-
-				byte[] contenidoDelFichero = Files.readAllBytes(file.toPath());
-
-				InputStreamResource outcomeInputStreamResource = new InputStreamResource(
-						new java.io.ByteArrayInputStream(contenidoDelFichero));
-
-				HttpHeaders headers = new HttpHeaders();
-				//Introducimos por header los parametros de la impresion
-				headers.set("Content-Disposition", "attachment; filename=" + file.getName());
-				headers.set("numCopies", "" + printAction.getCopies());
-				headers.set("printer", printAction.getPrinter());
-				if (printAction.getColor().equalsIgnoreCase("Color"))
-				{
-					headers.set("color", "true");
-				} else
-				{
-					headers.set("color", "false");
-				}
-
-				if (printAction.getOrientation().equalsIgnoreCase("Vertical"))
-				{
-					headers.set("orientation", "true");
-				} else
-				{
-					headers.set("orientation", "false");
-				}
-				
-				if (printAction.getSides().equalsIgnoreCase("Single"))
-				{
-					headers.set("faces", "false");
-				} else
-				{
-					headers.set("faces", "true");
-				}
-				
-				headers.set("user", printAction.getUser());
-				headers.set("id", String.valueOf(printAction.getId()));
-				
-				return ResponseEntity.ok().headers(headers).body(outcomeInputStreamResource);
-			}
-
-			return ResponseEntity.ok().build();
-
-		} catch (Exception exception)
-		{
-			String error = "Error getting the printers";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
-		}
-	}
-	
-	/**
-	 * Obtiene la información de la maquina cliente de como se ha finalizado una printAction
-	 * @param id
-	 * @param status
-	 * @return
-	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/get/print/status")
-	public ResponseEntity<?> getPrintFinalization(
-			@RequestHeader(name = "id") String id,
-			@RequestHeader(name = "status")	String status)
-	{
-		try
-		{		
-			Optional<PrintAction> action = this.printActionRepository.findById(Long.valueOf(id));	
-			if (action.isPresent())
-			{
-				if (status.equalsIgnoreCase(Constants.STATE_DONE))
-				{
-					action.get().setStatus(Constants.STATE_DONE);
-				}else 
-				{
-					action.get().setStatus(Constants.STATE_ERROR);
-				}
-				this.printActionRepository.saveAndFlush(action.get());
-				return ResponseEntity.ok().build();
-			}
-			else 
-			{
-				return ResponseEntity.status(400).body("No action found");
-			}
-		} catch (Exception exception)
-		{
-			String error = "Error getting the printers";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
-		}
-	}
 	
 	/**
 	 * Devuelve las impresiones filtradas por los parametros pasados como parametro, si no se envia ninguno manda todos
 	 * @param printerQuery parámetros de la query
 	 * @return lista de ResponseDtoPrintAction con aquellos encontrados
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/get/user/prints")
+	@RequestMapping(method = RequestMethod.POST, value = "/web/filter")
 	public ResponseEntity<?> buscarImpresiones(@RequestBody(required = true) RequestDtoPrintQuery printQuery) 
 	{
 	    try 
@@ -405,162 +199,243 @@ public class PrinterRest
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
-
+	
 	/**
-	 * Elimina las printActions en base a 2 parametros, fecha y el status en el que se encuetra
-	 * @param date
-	 * @param status
-	 * @return
+	 * Guarda en base de datos la peticion de impresion realizada desde la web y guarda el documento en el servidor
+	 * @param printer impresora
+	 * @param numCopies número de copias
+	 * @param orientation horizontal o vertical
+	 * @param color color o blanco y negro
+	 * @param sides una cara o doble cara
+	 * @param user usuario
+	 * @param file fichero
+	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/admin/delete/print_actions")
-	public ResponseEntity<?> deletePrintActions(
-			@RequestParam(required = false) String date,
-			@RequestParam(required = false) String status)
+	@RequestMapping(method = RequestMethod.POST, value = "/web/print", consumes = "multipart/form-data")
+	public ResponseEntity<?> imprimirPdf(@RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
+										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
+										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
+										 @RequestBody(required = true)  MultipartFile file)
 	{
 		try
-		{	
-			
-			List<PrintAction> actions = this.printActionRepository.findAll();
-			
-			if (status != null && !status.equals(""))
-			{
-				log.info( "Status:" + status);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getStatus().equals(status)) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
-			
-			if (date != null && !date.equals(""))
-			{
-				log.info( "date:" + date);
-				List<PrintAction> filteredActions = new ArrayList<PrintAction>();
-				
-				Date d = this.selectDeteleDays(date);
-				
-				for (PrintAction printAction : actions)
-				{
-					if(printAction.getDate().before(d)) {
-						filteredActions.add(printAction);
-					}
-				}
-				actions = filteredActions;
-			}
-			
-			for (PrintAction printAction : actions)
-			{
-				File file = new File(this.filePath + File.separator +printAction.getId()+ File.separator +printAction.getFileName());
-				file.delete();
-				file = new File(this.filePath + File.separator +printAction.getId());
-				file.delete();
-				this.printActionRepository.delete(printAction);
-			}
-			
-			return ResponseEntity.ok().build();
-			
-		} catch (Exception exception)
 		{
-			String error = "Error deleting the printersActions";
-			log.error(error, exception);
-			return ResponseEntity.status(500).build();
-		}
-	}
-		
-	/**
-	 * Metodo que calcula hasta que dia se debe borrar las printAction
-	 * @param selection
-	 * @return
-	 */
-	private Date selectDeteleDays (String selection) 
-	{
-		
-		Date date = new Date();
-		
-		Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date); 
+			// Creamos el objeto printAction con la configuracion recibida
+			PrintAction printAction = new PrintAction() ;
+			
+			printAction.setUser(user) ;
+			printAction.setPrinter(printer) ;
+			printAction.setStatus(Constants.STATE_TODO) ;
+			printAction.setFileName(file.getOriginalFilename()) ;
+			printAction.setCopies(numCopies) ;
+			printAction.setColor(color) ;
+			printAction.setOrientation(orientation) ;
+			printAction.setSides(sides) ;
+			printAction.setDate(new Date()) ;
+			
+			// Almacenamos la instancia en BBDD
+			this.printActionRepository.saveAndFlush(printAction) ;
 
-        calendar.add(Calendar.DAY_OF_MONTH, -1);
-		
-		switch (selection)
-		{
-			case PrinterRest.ONE_DAY_TIME:
-			{
-				calendar.add(Calendar.DAY_OF_MONTH, -1);
-			}
-			case PrinterRest.THREE_DAYS_TIME:
-			{
-				calendar.add(Calendar.DAY_OF_MONTH, -3);
-			}
-			case PrinterRest.ONE_WEEK_TIME:
-			{
-				calendar.add(Calendar.DAY_OF_MONTH, -7);
-			}
-			case PrinterRest.ONE_MONTH_TIME:
-			{
-				calendar.add(Calendar.MONTH, -1);
-			}
+			// Creamos un directorio temporal donde guardar el fichero
+			File folder = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ;
+			folder.mkdirs() ;
+			
+			// Creamos la ruta del fichero
+			String filePath = this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId() + File.separator + printAction.getFileName() ;
+			
+			// Guardamos el fichero en el servidor
+			Files.write(Paths.get(filePath), file.getBytes()) ;
+
+			return ResponseEntity.ok().build() ;
 		}
-		return calendar.getTime();
+		catch (IOException ioException)
+		{
+			String errorString = "IOException mientras se leía/escribía el contenido del fichero del usuario" ;
+			
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_IOEXCEPTION_FILE_READING_CODE, errorString, ioException) ;
+
+			log.error(errorString, printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	    catch (Exception exception) 
+	    {
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
+										 												  Constants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
+										 												  exception) ;
+	        
+			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+	    }
 	}
 	
 	/**
-	 * Escribe un fichero en la ruta seleccionada
-	 * 
-	 * @param name
-	 * @param content
+	 * Endpoint que guarda las impresoras guardadas en base de datos
+	 * @param listPrinters lista de impresoras actuales
+	 * @return ok si se guarda correctamente
 	 */
-	private void writeText(String name, byte[] content)
+	@RequestMapping(method = RequestMethod.POST, value = "/client/printers", consumes = "application/json")
+	public ResponseEntity<?> actualizarImpresorasActuales(@RequestBody(required = true) List<DtoPrinters> listPrinters)
 	{
-		// DELCARAMOS FLUJOS
-		FileOutputStream fileOutputStream = null;
-		DataOutputStream dataOutputStream = null;
-
 		try
 		{
-			// CREAMOS LOS FLUJOS
-			fileOutputStream = new FileOutputStream(name);
-			dataOutputStream = new DataOutputStream(fileOutputStream);
+			// Iteramos sobre todas las impresoras recibidas
+            for (DtoPrinters dtoPrinter : listPrinters)
+            {
+                // Buscamos la impresora por nombre (clave primaria)
+                Optional<Printer> optionalPrinter = this.printerRepository.findById(dtoPrinter.getName()) ;
 
-			// GUARDAMOS EL FICHERO
-			dataOutputStream.write(content);
-			// HACEMOS FLUSH
-			dataOutputStream.flush();
+                Printer printer = null ;
+                
+                // Si existe la impresora ...
+                if (optionalPrinter.isPresent())
+                {
+                    // ... la actualizamos
+                    printer = optionalPrinter.get() ;
+                    
+                    printer.setStatusId(dtoPrinter.getStatusId()) ;
+                    printer.setStatus(dtoPrinter.getStatus()) ;
+                    printer.setPrintingQueue(dtoPrinter.getPrintingQueue()) ;
+                }
+                else
+                {
+                    // Si no existe, creamos una nueva impresora
+                	printer = new Printer(dtoPrinter.getName(), dtoPrinter.getStatusId(), dtoPrinter.getStatus(), dtoPrinter.getPrintingQueue()) ;
+                }
+                
+                // Actualizamos la base de datos
+                this.printerRepository.saveAndFlush(printer) ;
+            }
 
-		} catch (IOException exception)
-		{
-			String message = "Error";
-			log.error(message, exception);
-		} finally
-		{
-			if (dataOutputStream != null)
-			{
-				try
-				{
-					dataOutputStream.close();
-				} catch (IOException exception)
-				{
-					String message = "Error";
-					log.error(message, exception);
-				}
-			}
-
-			if (fileOutputStream != null)
-			{
-				try
-				{
-					fileOutputStream.close();
-				} catch (IOException exception)
-				{
-					String message = "Error";
-					log.error(message, exception);
-				}
-			}
+            return ResponseEntity.ok().build();
 		}
+	    catch (Exception exception) 
+	    {
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
+										 												  Constants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales",
+										 												  exception) ;
+	        
+			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+	    }
 	}
 
+	/**
+	 * Configura y envia a la maquina cliente la informacion para realizar la impresion
+	 * @return 
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/client/print")
+	public ResponseEntity<?> buscarTareaParaImprimir()
+	{
+		File carpetaFichero   = null ;
+		File ficheroAimprimir = null ;
+		
+	    try
+	    {
+	        // Obtenemos todas las acciones con estado "TO DO" ordenadas por fecha ascendente
+	        List<PrintAction> actions = this.printActionRepository.findByStatusOrderByDateAsc(Constants.STATE_TODO) ;
+
+	        if (!actions.isEmpty())
+	        {
+	            // Obtenemos la primera tarea para imprimir (la más antigua)
+	        	PrintAction printAction = actions.get(0) ;
+
+	        	// Construimos la ruta de la carpeta del fichero
+	        	carpetaFichero = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ; 
+	        	
+	            // Construimos la ruta del fichero a partir de la configuración
+	            ficheroAimprimir = new File(carpetaFichero, printAction.getFileName()) ;
+
+	            // Leemos el contenido del fichero en bytes
+	            byte[] contenidoDelFichero = Files.readAllBytes(ficheroAimprimir.toPath()) ;
+
+	            // Creamos un InputStreamResource a partir del contenido leído
+	            InputStreamResource outcomeInputStreamResource = new InputStreamResource(new java.io.ByteArrayInputStream(contenidoDelFichero)) ;
+
+	            // Preparamos los headers de la respuesta HTTP
+	            HttpHeaders headers = printAction.generaCabecera(ficheroAimprimir) ;
+	            
+	            // Actualizamos el estado de la acción a "Enviado"
+	            printAction.setStatus(Constants.STATE_SEND) ;
+	            this.printActionRepository.saveAndFlush(printAction) ;
+
+	            // Devolvemos la respuesta con el archivo y los headers
+	            return ResponseEntity.ok().headers(headers).body(outcomeInputStreamResource) ;
+	        }
+
+	        // Si no hay acciones disponibles, devolvemos una respuesta vacía con estado 200
+	        return ResponseEntity.ok().build() ;
+	    }
+	    catch (IOException ioException)
+	    {
+	        String errorString = "IOException mientras se leía el contenido del fichero para enviar a imprimir" ;
+	        
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_IOEXCEPTION_FILE_READING_CODE, errorString, ioException) ;
+
+	        log.error(errorString, printersServerException) ;
+	        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+	    }
+	    catch (Exception exception)
+	    {
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
+	                                                                                      Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir",
+	                                                                                      exception) ;
+
+	        log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir", printersServerException) ;
+	        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+	    }
+	    finally
+	    {
+	    	// Si se cogió fichero para imprimir ...
+	    	if (ficheroAimprimir != null)
+	    	{
+	    		// ... lo borramos junto con la carpeta del id
+	    		
+	    		ficheroAimprimir.delete() ;
+	    		carpetaFichero.delete() ;
+	    	}
+	    }
+	}
+
+	/**
+	 * Obtiene la información de la maquina cliente de como se ha finalizado una printAction
+	 * @param id
+	 * @param status
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/client/status")
+	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader(name = "id") String id, @RequestHeader(name = "status") String status)
+	{
+		try
+		{		
+			// Buscamos la tarea de impresión por id
+			Optional<PrintAction> action = this.printActionRepository.findById(Long.valueOf(id)) ;	
+			
+			// Si no la encontramos, informamos del error
+			if (!action.isPresent())
+			{
+				String errorString = "La tarea con id " + id + " no fue encontrada para actualizar su status a " + status ;
+				
+				log.error(errorString) ;
+				
+				PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_PRINT_ACTION_NOT_FOUND_BY_ID, errorString) ;
+		        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+			}
+			
+			// Una vez encontrada, actualizamos su estado
+			action.get().setStatus(status) ;
+			
+			// Guardamos en BBDD
+			this.printActionRepository.saveAndFlush(action.get()) ;
+			
+			return ResponseEntity.ok().build();
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
+																	                      Constants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion",
+																	                      exception) ;
+
+			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	}
 }

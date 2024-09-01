@@ -15,17 +15,15 @@ import lombok.NoArgsConstructor;
 @Data
 public class Printer
 {
-
 	@Id
-	private String name;
+	private String name ;
 	
 	@Column
-	private int statusId;
+	private int statusId ;
 	
 	@Column
-	private String status;
+	private String status ;
 	
 	@Column
-	private int printingQueue;
-	
+	private int printingQueue ;
 }

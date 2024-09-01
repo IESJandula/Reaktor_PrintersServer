@@ -7,10 +7,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class ResponseDtoPrinters
+public class DtoPrinters
 {
 	/** Atributo - Name */
 	private String name ;
+	
+	/** Atributo - Status ID */
+	private int statusId ;
 	
 	/** Atributo - Status */
 	private String status ;
