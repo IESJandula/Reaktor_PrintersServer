@@ -49,6 +49,7 @@ public class PrintersServerException extends Exception
 		this.message   = message ;
 		this.exception = exception ;
 	}
+	
 	/**
 	 * mapa para devolver la excepcion
 	 * @return mapa con mensaje, error y en caso de tener excepcion tambien devuelve la excepcion
@@ -60,7 +61,7 @@ public class PrintersServerException extends Exception
 		messageMap.put("code", String.valueOf(this.code)) ;
 		messageMap.put("message", this.message) ;
 		
-		if(this.exception != null)
+		if (this.exception != null)
 		{
 			String stackTrace = ExceptionUtils.getStackTrace(this.exception) ;
 			messageMap.put("exception", stackTrace) ;

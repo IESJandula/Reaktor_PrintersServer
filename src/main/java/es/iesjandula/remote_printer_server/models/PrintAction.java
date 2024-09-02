@@ -58,6 +58,10 @@ public class PrintAction
     /** Atributo - Date */
     @Column
     private Date date ;
+    
+    /** Atributo - Error message */
+    @Column
+    private String errorMessage ; 
 
     /**
      * Default constructor
@@ -304,6 +308,22 @@ public class PrintAction
     }
     
     /**
+	 * @return the errorMessage
+	 */
+	public String getErrorMessage()
+	{
+		return this.errorMessage ;
+	}
+
+	/**
+	 * @param errorMessage the errorMessage to set
+	 */
+	public void setErrorMessage(String errorMessage)
+	{
+		this.errorMessage = errorMessage ;
+	}
+
+	/**
      * Genera los encabezados HTTP para la acción de impresión.
      * 
      * @param file El archivo asociado con la acción de impresión.

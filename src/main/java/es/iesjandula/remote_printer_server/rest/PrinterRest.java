@@ -402,7 +402,10 @@ public class PrinterRest
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/client/status")
-	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader(name = "id") String id, @RequestHeader(name = "status") String status)
+	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader(name = "id") String id,
+														     @RequestHeader(name = "status") String status,
+														     @RequestHeader(name = "message", required = false) String message,
+														     @RequestHeader(name = "exception", required = false) String exceptionMessage)
 	{
 		try
 		{		
@@ -420,11 +423,24 @@ public class PrinterRest
 		        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 			}
 			
+			// Obtenemos la printAction
+			PrintAction printAction = action.get() ; 
+			
 			// Una vez encontrada, actualizamos su estado
-			action.get().setStatus(status) ;
+			printAction.setStatus(status) ;
+			
+			// Si el estado es "Error" entonces apuntamos el error
+			if (Constants.STATE_ERROR.equals(status))
+			{
+				// Seteamos el mensaje de error
+				printAction.setErrorMessage(message) ;
+				
+				// Logueamos el error como warning
+				log.warn(message + " con la excepción: " + exceptionMessage) ;
+			}
 			
 			// Guardamos en BBDD
-			this.printActionRepository.saveAndFlush(action.get()) ;
+			this.printActionRepository.saveAndFlush(printAction) ;
 			
 			return ResponseEntity.ok().build();
 		}

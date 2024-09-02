@@ -37,4 +37,7 @@ public class ResponseDtoPrintAction
 
 	/** Atributo - Date */
     private Date date ;
+    
+	/** Atributo - Error Message */
+    private String errorMessage ;
 }

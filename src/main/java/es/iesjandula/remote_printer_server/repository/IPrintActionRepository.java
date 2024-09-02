@@ -15,7 +15,7 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 	public List<PrintAction> findByStatusOrderByDateAsc(String status) ;
 	
 	@Query("SELECT new es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction(p.user, p.printer, p.status, p.fileName, " +
-			 																		 "p.copies, p.color, p.orientation, p.sides, p.date) "   +
+			 																		 "p.copies, p.color, p.orientation, p.sides, p.date, p.errorMessage) "   +
 		   "FROM PrintAction p " +
 		   "WHERE " +
 				"(:user IS NULL OR p.user = :user) AND " 			+
