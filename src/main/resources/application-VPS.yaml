@@ -14,7 +14,7 @@ spring:
 server:
   port: 8082
   ssl:
-    key-store: classpath:somosjandula.p12
+    key-store: classpath:apisomosjandula.p12
     key-store-password: 1133557799
     keyStoreType: PKCS12
 logging:
