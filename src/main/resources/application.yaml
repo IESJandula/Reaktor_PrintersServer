@@ -18,4 +18,4 @@ spring:
       force: true
 server:
   port: 8082
-urlCors: http://localhost:5173, http://192.168.1.209:5173
+urlCors: http://localhost:5173, http://192.168.1.209:5173, http://192.168.1.181:5173
