@@ -14,8 +14,8 @@ spring:
 server:
   port: 8082
   ssl:
-    key-store: classpath:clever-bell.5-250-184-231.plesk.page_fullchain_and_key.p12
-    key-store-password: 123456
+    key-store: classpath:somosjandula.p12
+    key-store-password: 1133557799
     keyStoreType: PKCS12
 logging:
     level:
