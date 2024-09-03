@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.iesjandula.remote_printer_server.configurations.InicializacionCarpetas;
+import es.iesjandula.remote_printer_server.configurations.InicializacionSistema;
 import es.iesjandula.remote_printer_server.dto.DtoPrinters;
 import es.iesjandula.remote_printer_server.dto.RequestDtoPrintQuery;
 import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PrinterRest
 {
     @Autowired
-    private InicializacionCarpetas inicializacionCarpetas ;
+    private InicializacionSistema inicializacionCarpetas ;
 	
 	@Autowired
 	private IPrinterRepository printerRepository ;

@@ -1,5 +1,6 @@
 package es.iesjandula.remote_printer_server.utils;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -118,14 +119,14 @@ public class Constants
 	/****************** Ficheros y carpetas ******************/
 	/*********************************************************/
 	
-	/** Fichero días festivos */
-	public static final String FICHERO_DIAS_FESTIVOS  	   = "dias_festivos.csv" ;
-	
 	/** Nombre de la carpeta de configuracion */
 	public static final String PRINTERS_SERVER_CONFIG 	   = "printers_server_config" ;
 	
 	/** Nombre de la carpeta de configuracion al ejecutarse */
 	public static final String PRINTERS_SERVER_CONFIG_EXEC = "printers_server_config_exec" ;
+	
+	/** Fichero días festivos */
+	public static final String FICHERO_DIAS_FESTIVOS  	   = PRINTERS_SERVER_CONFIG_EXEC + File.separator + "dias_festivos.csv" ;
 	
 	/*********************************************************/
 	/*********************** Headers *************************/
