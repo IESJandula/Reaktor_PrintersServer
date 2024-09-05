@@ -15,7 +15,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -28,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import es.iesjandula.remote_printer_server.configurations.InicializacionSistema;
 import es.iesjandula.remote_printer_server.dto.DtoPrinters;
 import es.iesjandula.remote_printer_server.dto.RequestDtoPrintQuery;
+import es.iesjandula.remote_printer_server.dto.ResponseDtoGlobalState;
 import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
 import es.iesjandula.remote_printer_server.models.DiaFestivo;
 import es.iesjandula.remote_printer_server.models.PrintAction;
@@ -118,7 +118,35 @@ public class PrinterRest
 	@RequestMapping(method = RequestMethod.GET, value = "/web/validations")
 	public ResponseEntity<?> validacionesGlobalesPreviasImpresion()
 	{
-		String outcome = "" ;
+		// Validamos el día actual
+		ResponseDtoGlobalState responseDtoGlobalState = this.validacionesGlobalesPreviasImpresionValidarDia() ;
+		
+		try
+		{
+			// Obtenemos las impresoras y sus estados
+			responseDtoGlobalState.setDtoPrinters(this.printerRepository.getPrinters()) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
+					  Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
+					  exception) ;
+
+			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
+			
+	    	responseDtoGlobalState.setGlobalError("Error interno. Impresión no permitida") ;
+		}
+
+	    // Si todo va bien, se devuelve un 200
+	    return ResponseEntity.ok().body(responseDtoGlobalState) ;
+	}
+
+	/**
+	 * @return una instancia de ResponseDtoGlobalState
+	 */
+	private ResponseDtoGlobalState validacionesGlobalesPreviasImpresionValidarDia()
+	{
+		ResponseDtoGlobalState responseDtoGlobalState = new ResponseDtoGlobalState() ;
 		
 	    // Obtener la fecha y hora actual
 	    LocalDate fechaActual = LocalDate.now() ;
@@ -128,10 +156,10 @@ public class PrinterRest
 	    // Verificamos si es fuera del horario permitido (antes de las 8 o después de las 20 de lunes a viernes)
 	    if (diaActual == DayOfWeek.SATURDAY || diaActual == DayOfWeek.SUNDAY || horaActual.isBefore(LocalTime.of(8, 0)) || horaActual.isAfter(LocalTime.of(20, 0)))
 	    {
-	    	outcome = "Impresión no permitida. Solo activa de lunes a viernes de 8:00 a 20:00" ;
+	    	responseDtoGlobalState.setGlobalError("Impresión no permitida. Solo activa de lunes a viernes de 8:00 a 20:00") ;
 	    }
 	    
-	    if (outcome.isEmpty())
+	    if (responseDtoGlobalState.getGlobalError() == null)
 	    {
 	    	try
 	    	{
@@ -144,26 +172,16 @@ public class PrinterRest
 	    		if (diaFestivoOptional.isPresent())
 	    		{
 	    			DiaFestivo diaFestivo = diaFestivoOptional.get() ;
-	    			outcome = "Impresión no permitida. Hoy es día festivo: " + diaFestivo.getDescripcion() ;
+	    			responseDtoGlobalState.setGlobalError("Impresión no permitida. Hoy es día festivo: " + diaFestivo.getDescripcion()) ;
 	    		}
 	    	}
 	    	catch (ParseException parseException)
 	    	{
-	    		outcome = "Error al leer los festivos: " + parseException.getMessage() ;	
+	    		responseDtoGlobalState.setGlobalError("Error al leer los festivos: " + parseException.getMessage()) ;	
 	    	}	    	
 	    }
-
-	    if (!outcome.isEmpty())
-	    {
-	    	// Añadimos UTF-8 para las tildes
-		    HttpHeaders headers = new HttpHeaders();
-		    headers.set("Content-Type", "application/json; charset=UTF-8") ;
-	    	
-		    return new ResponseEntity<String>(outcome, headers, HttpStatus.BAD_REQUEST) ;
-	    }
-
-	    // Si todo va bien, se devuelve un 200
-	    return ResponseEntity.ok().build() ;
+	    
+		return responseDtoGlobalState ;
 	}
 	
 	/**
