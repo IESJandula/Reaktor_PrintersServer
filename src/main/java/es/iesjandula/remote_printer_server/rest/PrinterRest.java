@@ -156,7 +156,7 @@ public class PrinterRest
 	    // Verificamos si es fuera del horario permitido (antes de las 8 o después de las 20 de lunes a viernes)
 	    if (diaActual == DayOfWeek.SATURDAY || diaActual == DayOfWeek.SUNDAY || horaActual.isBefore(LocalTime.of(7, 45)) || horaActual.isAfter(LocalTime.of(20, 30)))
 	    {
-	    	responseDtoGlobalState.setGlobalError("Impresión no permitida. Solo activa de lunes a viernes de 7:45 a 20:30") ;
+	    	responseDtoGlobalState.setGlobalError("Impresión no permitida. Activa de lunes a viernes de 7:45 a 20:30") ;
 	    }
 	    
 	    if (responseDtoGlobalState.getGlobalError() == null)
