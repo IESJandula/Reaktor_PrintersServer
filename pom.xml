@@ -82,6 +82,10 @@
 	            <artifactId>maven-resources-plugin</artifactId>
 	            <configuration>
 	                <encoding>UTF-8</encoding>
+	                <useDefaultDelimiters>true</useDefaultDelimiters> <!-- Asegura el uso de delimitadores por defecto (${...}) -->
+	                <filters>
+	                    <filter>src/main/resources/application-VPS-filter.properties</filter>
+	                </filters>
 	            </configuration>
 	        </plugin>
 	        <!-- FIN - Util para la asignación de secretos desde Github -->
