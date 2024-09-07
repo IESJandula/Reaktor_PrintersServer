@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author Francisco Manuel Benítez Chico
+ */
 @Entity
 @Table(name = "printer")
 @NoArgsConstructor

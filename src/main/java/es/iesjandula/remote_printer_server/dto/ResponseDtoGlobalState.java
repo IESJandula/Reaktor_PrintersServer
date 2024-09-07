@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author Francisco Manuel Benítez Chico
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

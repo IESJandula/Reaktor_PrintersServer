@@ -40,6 +40,9 @@ import es.iesjandula.remote_printer_server.utils.ConversorFechasHoras;
 import es.iesjandula.remote_printer_server.utils.PrintersServerException;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author Francisco Manuel Benítez Chico
+ */
 @RestController
 @RequestMapping("/printers")
 @Slf4j

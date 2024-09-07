@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import es.iesjandula.remote_printer_server.models.DiaFestivo;
 
+/**
+ * @author Francisco Manuel Benítez Chico
+ */
 @Repository
 public interface IDiaFestivoRepository extends JpaRepository<DiaFestivo, Long>
 {

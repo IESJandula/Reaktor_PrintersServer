@@ -6,8 +6,8 @@ import java.util.Map;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
-* Clase PrintersServerException
-*/
+ * @author Francisco Manuel Benítez Chico
+ */
 public class PrintersServerException extends Exception
 {
 	/**

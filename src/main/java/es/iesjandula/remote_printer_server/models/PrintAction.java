@@ -14,6 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author Francisco Manuel Benítez Chico
+ */
 @Slf4j
 @Entity
 @Table(name = "print_action")

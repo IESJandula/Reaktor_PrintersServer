@@ -10,6 +10,9 @@ import org.springframework.data.repository.query.Param;
 import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
 import es.iesjandula.remote_printer_server.models.PrintAction;
 
+/**
+ * @author Francisco Manuel Benítez Chico
+ */
 public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 {
 	public List<PrintAction> findByStatusOrderByDateAsc(String status) ;
