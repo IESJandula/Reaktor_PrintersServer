@@ -50,7 +50,24 @@
 	</dependencies>
 
 	<build>
+		<!-- Util para la asignación de secretos desde Github -->
+	 	<resources>
+	        <resource>
+	            <directory>src/main/resources</directory>
+	            <filtering>true</filtering> <!-- Activar filtrado de recursos -->
+	        </resource>
+	    </resources>
+        <!-- FIN - Util para la asignación de secretos desde Github -->
 		<plugins>
+			<!-- Util para la asignación de secretos desde Github -->
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-resources-plugin</artifactId>
+	            <configuration>
+	                <encoding>UTF-8</encoding>
+	            </configuration>
+	        </plugin>
+	        <!-- FIN - Util para la asignación de secretos desde Github -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

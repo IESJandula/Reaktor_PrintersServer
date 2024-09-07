@@ -26,7 +26,10 @@ jobs:
       env:
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }} # Secreto para la contraseña de la base de datos
         SSL_KEY_STORE_PASSWORD: ${{ secrets.SSL_KEY_STORE_PASSWORD }} # Secreto para la contraseña del keystore SSL
-      run: mvn clean install -Dspring.datasource.password=$DB_PASSWORD -Dserver.ssl.key-store-password=$SSL_KEY_STORE_PASSWORD
+      run: |
+        echo "DB_PASSWORD=${DB_PASSWORD}" >> src/main/resources/application-VPS-filter.properties
+        echo "SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD}" >> src/main/resources/application-VPS-filter.properties
+        mvn clean install -Dspring.config.location=src/main/resources/application-VPS.yaml
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
