@@ -71,6 +71,10 @@
 	        </resource>
 	        <!-- FIN - Util para la asignación de secretos desde Github -->
 	    </resources>
+        <filters>
+	        <!-- Define el archivo de propiedades que contiene las variables a reemplazar -->
+	        <filter>src/main/resources/application-VPS-filter.properties</filter>
+	    </filters>
 		<plugins>
 			<!-- Util para la asignación de secretos desde Github -->
 	        <plugin>
