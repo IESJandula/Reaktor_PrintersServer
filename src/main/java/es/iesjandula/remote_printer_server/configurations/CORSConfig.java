@@ -8,7 +8,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Esta clase es la que habilita que una dirección IP remota pueda hacer llamadas al backend
- * @author Pablo Ruiz
  */
 @Configuration
 @EnableWebMvc
