@@ -60,21 +60,8 @@
 	                <exclude>**/*.csv</exclude> <!-- Excluir archivos .csv del filtrado -->
 	            </excludes>
 	        </resource>
-	        <!-- Añadir otra sección de recursos para incluir archivos binarios sin filtrado -->
-	        <resource>
-	            <directory>src/main/resources</directory>
-	            <filtering>false</filtering> <!-- No aplicar filtrado a archivos binarios -->
-	            <includes>
-	                <include>**/*.p12</include>
-	                <include>**/*.csv</include>
-	            </includes>
-	        </resource>
 	        <!-- FIN - Util para la asignación de secretos desde Github -->
 	    </resources>
-        <filters>
-	        <!-- Define el archivo de propiedades que contiene las variables a reemplazar -->
-	        <filter>src/main/resources/application-VPS-filter.properties</filter>
-	    </filters>
 		<plugins>
 			<!-- Util para la asignación de secretos desde Github -->
 	        <plugin>
