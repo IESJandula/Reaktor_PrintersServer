@@ -55,6 +55,10 @@
 	        <resource>
 	            <directory>src/main/resources</directory>
 	            <filtering>true</filtering> <!-- Activar filtrado de recursos -->
+	            <excludes>
+	                <exclude>**/*.p12</exclude> <!-- Excluir archivos .p12 (keystore) del filtrado -->
+	                <exclude>**/*.csv</exclude> <!-- Excluir archivos .csv del filtrado -->
+	            </excludes>
 	        </resource>
 	    </resources>
         <!-- FIN - Util para la asignación de secretos desde Github -->
