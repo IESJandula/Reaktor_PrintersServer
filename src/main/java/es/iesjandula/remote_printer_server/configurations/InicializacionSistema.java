@@ -195,6 +195,7 @@ public class InicializacionSistema
 		{
 		    try
 		    {
+		    	// Cierre del reader
 				reader.close() ;
 			}
 		    catch (IOException ioException)
