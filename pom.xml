@@ -58,11 +58,19 @@
 	            <excludes>
 	                <exclude>**/*.p12</exclude> <!-- Excluir archivos .p12 (keystore) del filtrado -->
 	                <exclude>**/*.csv</exclude> <!-- Excluir archivos .csv del filtrado -->
-	                <exclude>**/*.log</exclude> <!-- Excluir archivos .log del filtrado -->
 	            </excludes>
 	        </resource>
+	        <!-- Añadir otra sección de recursos para incluir archivos binarios sin filtrado -->
+	        <resource>
+	            <directory>src/main/resources</directory>
+	            <filtering>false</filtering> <!-- No aplicar filtrado a archivos binarios -->
+	            <includes>
+	                <include>**/*.p12</include>
+	                <include>**/*.csv</include>
+	            </includes>
+	        </resource>
+	        <!-- FIN - Util para la asignación de secretos desde Github -->
 	    </resources>
-        <!-- FIN - Util para la asignación de secretos desde Github -->
 		<plugins>
 			<!-- Util para la asignación de secretos desde Github -->
 	        <plugin>
