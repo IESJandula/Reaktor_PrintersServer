@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication(scanBasePackages = "es.iesjandula.remote_printer_server")
+@SpringBootApplication
 @ComponentScan(basePackages = {"es.iesjandula"})
 public class RemotePrinterServerApplication
 {
