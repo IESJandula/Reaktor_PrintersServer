@@ -3,7 +3,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/reaktor_printersserver
     username: root
-    password: qP8u-Ab80S_
+    password: ${DB_PASSWORD:password}
     hikari:
       connection-timeout: 60000
       maximum-pool-size: 5
@@ -15,7 +15,7 @@ server:
   port: 8082
   ssl:
     key-store: classpath:apijandula.p12
-    key-store-password: 1133557799
+    key-store-password: ${SSL_KEY_STORE_PASSWORD:password}
     keyStoreType: PKCS12
 logging:
     level:
