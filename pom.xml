@@ -58,6 +58,7 @@
 	            <excludes>
 	                <exclude>**/*.p12</exclude> <!-- Excluir archivos .p12 (keystore) del filtrado -->
 	                <exclude>**/*.csv</exclude> <!-- Excluir archivos .csv del filtrado -->
+	                <exclude>**/*.log</exclude> <!-- Excluir archivos .log del filtrado -->
 	            </excludes>
 	        </resource>
 	    </resources>
