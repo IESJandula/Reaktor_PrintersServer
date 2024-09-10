@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.iesjandula.base.base_server.services.AuthorizationService;
+import es.iesjandula.base.base_server.firebase.AuthorizationService;
 import es.iesjandula.base.base_server.utils.BaseServerConstants;
 import es.iesjandula.base.base_server.utils.BaseServerException;
 import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
@@ -419,10 +419,14 @@ public class PrinterRest
 	 * @return ok si se guarda correctamente
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/client/printers", consumes = "application/json")
-	public ResponseEntity<?> actualizarImpresorasActuales(@RequestBody(required = true) List<DtoPrinters> listPrinters)
+	public ResponseEntity<?> actualizarImpresorasActuales(@RequestHeader("Authorization") String authorizationHeader,
+														  @RequestBody(required = true) List<DtoPrinters> listPrinters)
 	{
 		try
 		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_CLIENTE_IMPRESORA) ;
+			
 			// Iteramos sobre todas las impresoras recibidas
             for (DtoPrinters dtoPrinter : listPrinters)
             {
@@ -470,13 +474,16 @@ public class PrinterRest
 	 * @return 
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/client/print")
-	public ResponseEntity<?> buscarTareaParaImprimir()
+	public ResponseEntity<?> buscarTareaParaImprimir(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		File carpetaFichero   = null ;
 		File ficheroAimprimir = null ;
 		
 	    try
 	    {
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_CLIENTE_IMPRESORA) ;
+	    	
 	        // Obtenemos todas las acciones con estado "TO DO" ordenadas por fecha ascendente
 	        List<PrintAction> actions = this.printActionRepository.findByStatusOrderByDateAsc(Constants.STATE_TODO) ;
 
@@ -550,13 +557,17 @@ public class PrinterRest
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/client/status")
-	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader(name = "id") String id,
+	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader("Authorization") String authorizationHeader,
+															 @RequestHeader(name = "id") String id,
 														     @RequestHeader(name = "status") String status,
 														     @RequestHeader(name = "message", required = false) String message,
 														     @RequestHeader(name = "exception", required = false) String exceptionMessage)
 	{
 		try
-		{		
+		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_CLIENTE_IMPRESORA) ;
+
 			// Buscamos la tarea de impresión por id
 			Optional<PrintAction> action = this.printActionRepository.findById(Long.valueOf(id)) ;	
 			
