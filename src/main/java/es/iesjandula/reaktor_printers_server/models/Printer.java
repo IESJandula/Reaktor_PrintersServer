@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.models;
+package es.iesjandula.reaktor_printers_server.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

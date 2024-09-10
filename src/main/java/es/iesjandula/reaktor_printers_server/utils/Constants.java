@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.utils;
+package es.iesjandula.reaktor_printers_server.utils;
 
 import java.io.File;
 import java.util.Arrays;
@@ -77,12 +77,6 @@ public class Constants
 	/*********************************************************/
 	/*********************** Errores *************************/
 	/*********************************************************/
-	
-	/** Error - Excepción genérica - Código */
-	public static final int ERR_GENERIC_EXCEPTION_CODE 			  = 100 ;
-	
-	/** Error - Excepción genérica - Mensaje */
-	public static final String ERR_GENERIC_EXCEPTION_MSG 		  = "Excepción genérica en " ;
 	
 	/** Error - IOException - Mientras se leía el fichero Multipart - Código */
 	public static final int ERR_IOEXCEPTION_FILE_READING_CODE 	  = 101 ;

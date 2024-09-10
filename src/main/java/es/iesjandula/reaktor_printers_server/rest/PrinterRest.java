@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.rest;
+package es.iesjandula.reaktor_printers_server.rest;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,20 +25,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.iesjandula.remote_printer_server.configurations.InicializacionSistema;
-import es.iesjandula.remote_printer_server.dto.DtoPrinters;
-import es.iesjandula.remote_printer_server.dto.RequestDtoPrintQuery;
-import es.iesjandula.remote_printer_server.dto.ResponseDtoGlobalState;
-import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
-import es.iesjandula.remote_printer_server.models.DiaFestivo;
-import es.iesjandula.remote_printer_server.models.PrintAction;
-import es.iesjandula.remote_printer_server.models.Printer;
-import es.iesjandula.remote_printer_server.repository.IDiaFestivoRepository;
-import es.iesjandula.remote_printer_server.repository.IPrintActionRepository;
-import es.iesjandula.remote_printer_server.repository.IPrinterRepository;
-import es.iesjandula.remote_printer_server.utils.Constants;
-import es.iesjandula.remote_printer_server.utils.ConversorFechasHoras;
-import es.iesjandula.remote_printer_server.utils.PrintersServerException;
+import es.iesjandula.base.base_server.services.AuthorizationService;
+import es.iesjandula.base.base_server.utils.BaseServerConstants;
+import es.iesjandula.base.base_server.utils.BaseServerException;
+import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
+import es.iesjandula.reaktor_printers_server.dto.DtoPrinters;
+import es.iesjandula.reaktor_printers_server.dto.RequestDtoPrintQuery;
+import es.iesjandula.reaktor_printers_server.dto.ResponseDtoGlobalState;
+import es.iesjandula.reaktor_printers_server.dto.ResponseDtoPrintAction;
+import es.iesjandula.reaktor_printers_server.models.DiaFestivo;
+import es.iesjandula.reaktor_printers_server.models.PrintAction;
+import es.iesjandula.reaktor_printers_server.models.Printer;
+import es.iesjandula.reaktor_printers_server.repository.IDiaFestivoRepository;
+import es.iesjandula.reaktor_printers_server.repository.IPrintActionRepository;
+import es.iesjandula.reaktor_printers_server.repository.IPrinterRepository;
+import es.iesjandula.reaktor_printers_server.utils.Constants;
+import es.iesjandula.reaktor_printers_server.utils.ConversorFechasHoras;
+import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -59,25 +63,37 @@ public class PrinterRest
 	
 	@Autowired
 	private IDiaFestivoRepository diaFestivoRepository ;
+	
+	@Autowired
+	private AuthorizationService authorizationService ;
 
 	/**
 	 * Devuelve las impresoras guardadas en base de datos
 	 * @return la lista de impresoras
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/web/printers")
-	public ResponseEntity<?> obtenerImpresoras()
+	public ResponseEntity<?> obtenerImpresoras(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		try
 		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+			
+			// Obtenemos la lista de impresoras
 			return ResponseEntity.ok().body(this.printerRepository.getPrinters()) ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
-					  Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
-					  exception) ;
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
+											    exception) ;
 
-			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -86,57 +102,152 @@ public class PrinterRest
 	 * @return la lista de estados disponibles
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/web/states")
-	public ResponseEntity<List<String>> obtenerEstados()
+	public ResponseEntity<?> obtenerEstados(@RequestHeader("Authorization") String authorizationHeader)
 	{
-		return ResponseEntity.ok().body(Constants.STATES_LIST) ;
+		try
+		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+		
+			// Obtenemos la lista de estados
+			return ResponseEntity.ok().body(Constants.STATES_LIST) ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+											    exception) ;
+
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
 	}
 	
 	/**
 	 * @return la lista de orientaciones disponibles
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/web/orientations")
-	public ResponseEntity<List<String>> obtenerOrientaciones()
+	public ResponseEntity<?> obtenerOrientaciones(@RequestHeader("Authorization") String authorizationHeader)
 	{
-		return ResponseEntity.ok().body(Constants.ORIENTATIONS_LIST) ;
+		try
+		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+		
+			// Obtenemos la lista de orientaciones
+			return ResponseEntity.ok().body(Constants.ORIENTATIONS_LIST) ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+											    exception) ;
+
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
 	}
 	
 	/**
 	 * @return la lista de colores disponibles
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/web/colors")
-	public ResponseEntity<List<String>> obtenerColores()
+	public ResponseEntity<?> obtenerColores(@RequestHeader("Authorization") String authorizationHeader)
 	{
-		return ResponseEntity.ok().body(Constants.COLORS_LIST) ;
+		try
+		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+		
+			// Obtenemos la lista de colores
+			return ResponseEntity.ok().body(Constants.COLORS_LIST) ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+											    exception) ;
+
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
 	}
 	
 	/**
 	 * @return la lista de caras disponibles
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/web/sides")
-	public ResponseEntity<List<String>> obtenerCaras()
+	public ResponseEntity<?> obtenerCaras(@RequestHeader("Authorization") String authorizationHeader)
 	{
-		return ResponseEntity.ok().body(Constants.SIDES_LIST) ;
-	}
-	
-	@RequestMapping(method = RequestMethod.GET, value = "/web/validations")
-	public ResponseEntity<?> validacionesGlobalesPreviasImpresion()
-	{
-		// Validamos el día actual
-		ResponseDtoGlobalState responseDtoGlobalState = this.validacionesGlobalesPreviasImpresionValidarDia() ;
-		
 		try
 		{
-			// Obtenemos las impresoras y sus estados
-			responseDtoGlobalState.setDtoPrinters(this.printerRepository.getPrinters()) ;
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+		
+			// Obtenemos la lista de colores
+			return ResponseEntity.ok().body(Constants.SIDES_LIST) ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
-					  Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
-					  exception) ;
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+											    exception) ;
+	
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/web/validations")
+	public ResponseEntity<?> validacionesGlobalesPreviasImpresion(@RequestHeader("Authorization") String authorizationHeader)
+	{
+		ResponseDtoGlobalState responseDtoGlobalState = new ResponseDtoGlobalState() ;
+		
+		try
+		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
 
-			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
+			// Validamos el día actual
+			this.validacionesGlobalesPreviasImpresionValidarDia(responseDtoGlobalState) ;
 			
+			// Obtenemos las impresoras y sus estados
+			responseDtoGlobalState.setDtoPrinters(this.printerRepository.getPrinters()) ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
+	        									exception) ;
+
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
+			
+			// Seteamos como error interno
 	    	responseDtoGlobalState.setGlobalError("Error interno. Impresión no permitida") ;
 		}
 
@@ -145,12 +256,10 @@ public class PrinterRest
 	}
 
 	/**
-	 * @return una instancia de ResponseDtoGlobalState
+	 * @param responseDtoGlobalState Response DTO Global State 
 	 */
-	private ResponseDtoGlobalState validacionesGlobalesPreviasImpresionValidarDia()
+	private void validacionesGlobalesPreviasImpresionValidarDia(ResponseDtoGlobalState responseDtoGlobalState)
 	{
-		ResponseDtoGlobalState responseDtoGlobalState = new ResponseDtoGlobalState() ;
-		
 	    // Obtener la fecha y hora actual
 	    LocalDate fechaActual = LocalDate.now() ;
 	    DayOfWeek diaActual   = fechaActual.getDayOfWeek() ;
@@ -183,8 +292,6 @@ public class PrinterRest
 	    		responseDtoGlobalState.setGlobalError("Error al leer los festivos: " + parseException.getMessage()) ;	
 	    	}	    	
 	    }
-	    
-		return responseDtoGlobalState ;
 	}
 	
 	/**
@@ -193,10 +300,14 @@ public class PrinterRest
 	 * @return lista de ResponseDtoPrintAction con aquellos encontrados
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/web/filter")
-	public ResponseEntity<?> buscarImpresiones(@RequestBody(required = true) RequestDtoPrintQuery printQuery) 
+	public ResponseEntity<?> buscarImpresiones(@RequestHeader("Authorization") String authorizationHeader,
+											   @RequestBody(required = true) RequestDtoPrintQuery printQuery) 
 	{
 	    try 
 	    {
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+	    	
 	    	// Convertimos las fechas string a date
 	        Date startDate = ConversorFechasHoras.convertirStringToDate(printQuery.getStartDate()) ;
 	        Date endDate   = ConversorFechasHoras.convertirStringToDate(printQuery.getEndDate()) ;
@@ -209,14 +320,19 @@ public class PrinterRest
 	        																				   endDate) ;
 	        // Devolvemos el resultado
 	        return ResponseEntity.ok().body(actions);
-	    } 
+	    }
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
 	    catch (Exception exception) 
 	    {
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
-										 												  Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones",
-										 												  exception) ;
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+        										BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones",
+										 		exception) ;
 	        
-			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones", printersServerException) ;
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
@@ -233,13 +349,17 @@ public class PrinterRest
 	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/web/print", consumes = "multipart/form-data")
-	public ResponseEntity<?> imprimirPdf(@RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
+	public ResponseEntity<?> imprimirPdf(@RequestHeader("Authorization") String authorizationHeader,
+										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
 										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
 										 @RequestBody(required = true)  MultipartFile file)
 	{
 		try
 		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+			
 			// Creamos el objeto printAction con la configuracion recibida
 			PrintAction printAction = new PrintAction() ;
 			
@@ -277,13 +397,18 @@ public class PrinterRest
 			log.error(errorString, printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
 	    catch (Exception exception) 
 	    {
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
-										 												  Constants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
-										 												  exception) ;
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+        										BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
+										 		exception) ;
 	        
-			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
@@ -330,11 +455,12 @@ public class PrinterRest
 		}
 	    catch (Exception exception) 
 	    {
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
-										 												  Constants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales",
-										 												  exception) ;
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales",
+										 		exception) ;
 	        
-			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales", printersServerException) ;
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
@@ -396,11 +522,12 @@ public class PrinterRest
 	    }
 	    catch (Exception exception)
 	    {
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
-	                                                                                      Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir",
-	                                                                                      exception) ;
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir",
+	                                            exception) ;
 
-	        log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir", printersServerException) ;
+	        log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir", printersServerException) ;
 	        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	    finally
@@ -467,11 +594,12 @@ public class PrinterRest
 		}
 		catch (Exception exception)
 		{
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_GENERIC_EXCEPTION_CODE, 
-																	                      Constants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion",
-																	                      exception) ;
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion",
+												exception) ;
 
-			log.error(Constants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion", printersServerException) ;
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}

@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server;
+package es.iesjandula.reaktor_printers_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,10 +11,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @ComponentScan(basePackages = {"es.iesjandula"})
-public class RemotePrinterServerApplication
+public class ReaktorPrintersServerApplication
 {
 	public static void main(String[] args)
 	{
-		SpringApplication.run(RemotePrinterServerApplication.class, args);
+		SpringApplication.run(ReaktorPrintersServerApplication.class, args);
 	}
 }

@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.utils;
+package es.iesjandula.reaktor_printers_server.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

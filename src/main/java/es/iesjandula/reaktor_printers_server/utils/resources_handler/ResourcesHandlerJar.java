@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.utils.resources_handler;
+package es.iesjandula.reaktor_printers_server.utils.resources_handler;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +13,8 @@ import java.util.jar.JarFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import es.iesjandula.remote_printer_server.utils.Constants;
-import es.iesjandula.remote_printer_server.utils.PrintersServerException;
+import es.iesjandula.reaktor_printers_server.utils.Constants;
+import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
 
 /**
  * @author Francisco Manuel Benítez Chico

@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.configurations;
+package es.iesjandula.reaktor_printers_server.configurations;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CORSConfig implements WebMvcConfigurer
 {
 	/** URL permitida de CORS */
-	@Value("${urlCors}")
+	@Value("${reaktor.urlCors}")
 	private String[] urlCors;
 	
 	/**

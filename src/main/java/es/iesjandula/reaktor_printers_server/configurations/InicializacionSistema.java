@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.configurations;
+package es.iesjandula.reaktor_printers_server.configurations;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,14 +15,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
-import es.iesjandula.remote_printer_server.models.DiaFestivo;
-import es.iesjandula.remote_printer_server.repository.IDiaFestivoRepository;
-import es.iesjandula.remote_printer_server.utils.Constants;
-import es.iesjandula.remote_printer_server.utils.ConversorFechasHoras;
-import es.iesjandula.remote_printer_server.utils.PrintersServerException;
-import es.iesjandula.remote_printer_server.utils.resources_handler.ResourcesHandler;
-import es.iesjandula.remote_printer_server.utils.resources_handler.ResourcesHandlerFile;
-import es.iesjandula.remote_printer_server.utils.resources_handler.ResourcesHandlerJar;
+import es.iesjandula.reaktor_printers_server.models.DiaFestivo;
+import es.iesjandula.reaktor_printers_server.repository.IDiaFestivoRepository;
+import es.iesjandula.reaktor_printers_server.utils.Constants;
+import es.iesjandula.reaktor_printers_server.utils.ConversorFechasHoras;
+import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
+import es.iesjandula.reaktor_printers_server.utils.resources_handler.ResourcesHandler;
+import es.iesjandula.reaktor_printers_server.utils.resources_handler.ResourcesHandlerFile;
+import es.iesjandula.reaktor_printers_server.utils.resources_handler.ResourcesHandlerJar;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 

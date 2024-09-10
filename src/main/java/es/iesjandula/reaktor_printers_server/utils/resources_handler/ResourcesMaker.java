@@ -1,9 +1,9 @@
-package es.iesjandula.remote_printer_server.utils.resources_handler;
+package es.iesjandula.reaktor_printers_server.utils.resources_handler;
 
 import java.io.File;
 import java.net.URL;
 
-import es.iesjandula.remote_printer_server.utils.PrintersServerException;
+import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
 
 /**
  * @author Francisco Manuel Benítez Chico

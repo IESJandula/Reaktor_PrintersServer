@@ -1,4 +1,4 @@
-package es.iesjandula.remote_printer_server.repository;
+package es.iesjandula.reaktor_printers_server.repository;
 
 import java.util.Date;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction;
-import es.iesjandula.remote_printer_server.models.PrintAction;
+import es.iesjandula.reaktor_printers_server.dto.ResponseDtoPrintAction;
+import es.iesjandula.reaktor_printers_server.models.PrintAction;
 
 /**
  * @author Francisco Manuel Benítez Chico
@@ -17,8 +17,8 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 {
 	public List<PrintAction> findByStatusOrderByDateAsc(String status) ;
 	
-	@Query("SELECT new es.iesjandula.remote_printer_server.dto.ResponseDtoPrintAction(p.user, p.printer, p.status, p.fileName, " +
-			 																		 "p.copies, p.color, p.orientation, p.sides, p.date, p.errorMessage) "   +
+	@Query("SELECT new es.iesjandula.reaktor_printers_server.dto.ResponseDtoPrintAction(p.user, p.printer, p.status, p.fileName, " +
+			 																		   "p.copies, p.color, p.orientation, p.sides, p.date, p.errorMessage) "   +
 		   "FROM PrintAction p " +
 		   "WHERE " +
 				"(:user IS NULL OR p.user = :user) AND " 			+
