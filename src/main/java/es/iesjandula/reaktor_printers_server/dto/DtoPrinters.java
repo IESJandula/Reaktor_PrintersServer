@@ -1,5 +1,7 @@
 package es.iesjandula.reaktor_printers_server.dto;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,4 +25,7 @@ public class DtoPrinters
 	
 	/** Atributo - Printing queue */
 	private int printingQueue ;
+	
+	/** Atributo - Last update */
+	private Date lastUpdate ;
 }

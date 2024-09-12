@@ -444,11 +444,16 @@ public class PrinterRest
                     printer.setStatusId(dtoPrinter.getStatusId()) ;
                     printer.setStatus(dtoPrinter.getStatus()) ;
                     printer.setPrintingQueue(dtoPrinter.getPrintingQueue()) ;
+                    printer.setLastUpdate(dtoPrinter.getLastUpdate()) ;
                 }
                 else
                 {
                     // Si no existe, creamos una nueva impresora
-                	printer = new Printer(dtoPrinter.getName(), dtoPrinter.getStatusId(), dtoPrinter.getStatus(), dtoPrinter.getPrintingQueue()) ;
+                	printer = new Printer(dtoPrinter.getName(),
+                						  dtoPrinter.getStatusId(),
+                						  dtoPrinter.getStatus(),
+                						  dtoPrinter.getPrintingQueue(),
+                						  dtoPrinter.getLastUpdate()) ;
                 }
                 
                 // Actualizamos la base de datos

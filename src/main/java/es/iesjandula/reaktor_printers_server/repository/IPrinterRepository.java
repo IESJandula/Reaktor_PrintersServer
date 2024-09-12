@@ -13,7 +13,7 @@ import es.iesjandula.reaktor_printers_server.models.Printer;
  */
 public interface IPrinterRepository extends JpaRepository<Printer, String>
 {
-	@Query("SELECT new es.iesjandula.reaktor_printers_server.dto.DtoPrinters(p.name, p.statusId, p.status, p.printingQueue) "   +
+	@Query("SELECT new es.iesjandula.reaktor_printers_server.dto.DtoPrinters(p.name, p.statusId, p.status, p.printingQueue, p.lastUpdate) "   +
 		   "FROM Printer p")
 	List<DtoPrinters> getPrinters() ;
 }

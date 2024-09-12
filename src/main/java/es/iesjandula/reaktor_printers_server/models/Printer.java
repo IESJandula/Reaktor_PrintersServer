@@ -1,5 +1,7 @@
 package es.iesjandula.reaktor_printers_server.models;
 
+import java.util.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -29,4 +31,7 @@ public class Printer
 	
 	@Column
 	private int printingQueue ;
+	
+	@Column
+	private Date lastUpdate ;
 }
