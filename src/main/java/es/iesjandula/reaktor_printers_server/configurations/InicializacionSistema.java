@@ -15,14 +15,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
+import es.iesjandula.base.base_server.resources_handler.ResourcesHandler;
+import es.iesjandula.base.base_server.resources_handler.ResourcesHandlerFile;
+import es.iesjandula.base.base_server.resources_handler.ResourcesHandlerJar;
+import es.iesjandula.base.base_server.utils.BaseServerException;
 import es.iesjandula.reaktor_printers_server.models.DiaFestivo;
 import es.iesjandula.reaktor_printers_server.repository.IDiaFestivoRepository;
 import es.iesjandula.reaktor_printers_server.utils.Constants;
 import es.iesjandula.reaktor_printers_server.utils.ConversorFechasHoras;
 import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
-import es.iesjandula.reaktor_printers_server.utils.resources_handler.ResourcesHandler;
-import es.iesjandula.reaktor_printers_server.utils.resources_handler.ResourcesHandlerFile;
-import es.iesjandula.reaktor_printers_server.utils.resources_handler.ResourcesHandlerJar;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,10 +46,11 @@ public class InicializacionSistema
 	/**
 	 * Este método se encarga de inicializar el sistema
 	 * ya sea en el entorno de desarrollo o ejecutando JAR
-	 * @throws PrintersServerException con una excepción
+	 * @throws PrintersServerException con una excepción cargando los días festivos
+	 * @throws BaseServerException con una excepción cargando las carpetas de resources
 	 */
 	@PostConstruct
-	public void inicializarSistema() throws PrintersServerException
+	public void inicializarSistema() throws PrintersServerException, BaseServerException
 	{
 		// Esta es la carpeta con las subcarpetas y configuraciones
 	    ResourcesHandler printersServerConfig = this.getResourcesHandler(Constants.PRINTERS_SERVER_CONFIG);

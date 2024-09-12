@@ -105,9 +105,6 @@ public class Constants
 	/** Error - Tarea no encontrada por id */
 	public static final int ERR_PRINT_ACTION_NOT_FOUND_BY_ID 	  = 109 ;
 	
-	/** Error - ResourcesHandler */
-	public static final int EXC_ERR_CODE_RESOURCES_HANDLER 		  = 110 ;
-
 
 	/*********************************************************/
 	/****************** Ficheros y carpetas ******************/
