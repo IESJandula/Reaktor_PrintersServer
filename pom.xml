@@ -47,46 +47,59 @@
 			<artifactId>BaseServer</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<!-- Utilidad para el conteo de páginas de PDFs -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<!-- Util para la asignación de secretos desde Github -->
-	 	<resources>
-	        <resource>
-	            <directory>src/main/resources</directory>
-	            <filtering>true</filtering> <!-- Activar filtrado de recursos -->
-	            <excludes>
-	                <exclude>**/*.p12</exclude> <!-- Excluir archivos .p12 (keystore) del filtrado -->
-	                <exclude>**/*.pem</exclude> <!-- Excluir archivos .pem (keystore) del filtrado -->
-	                <exclude>**/*.csv</exclude> <!-- Excluir archivos .csv del filtrado -->
-	            </excludes>
-	        </resource>
-	        <!-- Añadir otra sección de recursos para incluir archivos binarios sin filtrado -->
-	        <resource>
-	            <directory>src/main/resources</directory>
-	            <filtering>false</filtering> <!-- No aplicar filtrado a archivos binarios -->
-	            <includes>
-	                <include>**/*.p12</include>
-	                <include>**/*.pem</include>
-	                <include>**/*.csv</include>
-	            </includes>
-	        </resource>
-	        <!-- FIN - Util para la asignación de secretos desde Github -->
-	    </resources>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering> <!-- Activar filtrado de recursos -->
+				<excludes>
+					<exclude>**/*.p12</exclude> <!-- Excluir archivos .p12
+					(keystore) del filtrado -->
+					<exclude>**/*.pem</exclude> <!-- Excluir archivos .pem
+					(keystore) del filtrado -->
+					<exclude>**/*.csv</exclude> <!-- Excluir archivos .csv del
+					filtrado -->
+				</excludes>
+			</resource>
+			<!-- Añadir otra sección de recursos para incluir archivos binarios
+			sin filtrado -->
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering> <!-- No aplicar filtrado a archivos
+				binarios -->
+				<includes>
+					<include>**/*.p12</include>
+					<include>**/*.pem</include>
+					<include>**/*.csv</include>
+				</includes>
+			</resource>
+			<!-- FIN - Util para la asignación de secretos desde Github -->
+		</resources>
 		<plugins>
 			<!-- Util para la asignación de secretos desde Github -->
-	        <plugin>
-	            <groupId>org.apache.maven.plugins</groupId>
-	            <artifactId>maven-resources-plugin</artifactId>
-	            <configuration>
-	                <encoding>UTF-8</encoding>
-	                <useDefaultDelimiters>true</useDefaultDelimiters> <!-- Asegura el uso de delimitadores por defecto (${...}) -->
-	                <filters>
-	                    <filter>src/main/resources/application-VPS-filter.properties</filter>
-	                </filters>
-	            </configuration>
-	        </plugin>
-	        <!-- FIN - Util para la asignación de secretos desde Github -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<useDefaultDelimiters>true</useDefaultDelimiters> <!--
+					Asegura el uso de delimitadores por defecto (${...}) -->
+					<filters>
+						<filter>
+							src/main/resources/application-VPS-filter.properties</filter>
+					</filters>
+				</configuration>
+			</plugin>
+			<!-- FIN - Util para la asignación de secretos desde Github -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

@@ -64,7 +64,19 @@ public class PrintAction
     
     /** Atributo - Error message */
     @Column
-    private String errorMessage ; 
+    private String errorMessage ;
+    
+    /** Atributo - File size in KB */
+    @Column
+    private Long fileSizeInKB ;
+    
+    /** Atributo - Numero de páginas  PDF */
+    @Column
+    private Integer numeroPaginasPdf ;
+    
+    /** Atributo - Hojas totales */
+    @Column
+    private Integer hojasTotales ;
 
     /**
      * Default constructor
@@ -324,6 +336,54 @@ public class PrintAction
 	public void setErrorMessage(String errorMessage)
 	{
 		this.errorMessage = errorMessage ;
+	}
+	
+	/**
+	 * @return the fileSizeInKB
+	 */
+	public Long getFileSizeInKB()
+	{
+		return this.fileSizeInKB ;
+	}
+
+	/**
+	 * @param fileSizeInKB the fileSizeInKB to set
+	 */
+	public void setFileSizeInKB(Long fileSizeInKB)
+	{
+		this.fileSizeInKB = fileSizeInKB ;
+	}
+
+	/**
+	 * @return the numeroPaginasPdf
+	 */
+	public Integer getNumeroPaginasPdf()
+	{
+		return this.numeroPaginasPdf ;
+	}
+
+	/**
+	 * @param numeroPaginasPdf the numeroPaginasPdf to set
+	 */
+	public void setNumeroPaginasPdf(Integer numeroPaginasPdf)
+	{
+		this.numeroPaginasPdf = numeroPaginasPdf ;
+	}
+
+	/**
+	 * @return the hojasTotales
+	 */
+	public Integer getHojasTotales()
+	{
+		return this.hojasTotales ;
+	}
+
+	/**
+	 * @param hojasTotales the hojasTotales to set
+	 */
+	public void setHojasTotales(Integer hojasTotales)
+	{
+		this.hojasTotales = hojasTotales;
 	}
 
 	/**

@@ -105,6 +105,9 @@ public class Constants
 	/** Error - Tarea no encontrada por id */
 	public static final int ERR_PRINT_ACTION_NOT_FOUND_BY_ID 	  = 109 ;
 	
+	/** Error - Mientras se conseguía la metainformación del fichero PDF */
+	public static final int ERR_IOEXCEPTION_GETTING_METAINFO_PDF  = 110 ;
+	
 
 	/*********************************************************/
 	/****************** Ficheros y carpetas ******************/

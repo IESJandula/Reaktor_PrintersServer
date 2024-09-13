@@ -43,4 +43,13 @@ public class ResponseDtoPrintAction
     
 	/** Atributo - Error Message */
     private String errorMessage ;
+    
+    /** Atributo - File size in KB */
+    private Long fileSizeInKB ;
+    
+    /** Atributo - Numero de páginas  PDF */
+    private Integer numeroPaginasPdf ;
+    
+    /** Atributo - Hojas totales */
+    private Integer hojasTotales ;
 }

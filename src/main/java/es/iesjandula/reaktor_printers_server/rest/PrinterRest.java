@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -41,6 +43,7 @@ import es.iesjandula.reaktor_printers_server.repository.IPrintActionRepository;
 import es.iesjandula.reaktor_printers_server.repository.IPrinterRepository;
 import es.iesjandula.reaktor_printers_server.utils.Constants;
 import es.iesjandula.reaktor_printers_server.utils.ConversorFechasHoras;
+import es.iesjandula.reaktor_printers_server.utils.PdfMetaInfo;
 import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -360,18 +363,24 @@ public class PrinterRest
 			// Primero autorizamos la petición
 			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
 			
+			// Obtenemos los metadatos del fichero PDF
+			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(numCopies, sides, file) ;
+			
 			// Creamos el objeto printAction con la configuracion recibida
 			PrintAction printAction = new PrintAction() ;
 			
 			printAction.setUser(user) ;
 			printAction.setPrinter(printer) ;
 			printAction.setStatus(Constants.STATE_TODO) ;
-			printAction.setFileName(file.getOriginalFilename()) ;
+			printAction.setFileName(pdfMetaInfo.getOriginalFilename()) ;
 			printAction.setCopies(numCopies) ;
 			printAction.setColor(color) ;
 			printAction.setOrientation(orientation) ;
 			printAction.setSides(sides) ;
 			printAction.setDate(new Date()) ;
+			printAction.setFileSizeInKB(pdfMetaInfo.getFileSizeInKB()) ;
+			printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;
+			printAction.setHojasTotales(pdfMetaInfo.getHojasTotales()) ;
 			
 			// Almacenamos la instancia en BBDD
 			this.printActionRepository.saveAndFlush(printAction) ;
@@ -413,6 +422,59 @@ public class PrinterRest
 	    }
 	}
 	
+	/**
+	 * @param numCopies número de copias
+	 * @param sides a una cara o doble cara
+	 * @param multipartFile fichero PDF
+	 * @return PdfMetaInfo
+	 * @throws PrintersServerException con un error
+	 */
+	private PdfMetaInfo obtenerInformacionFicheroPdf(Integer numCopies, String sides, MultipartFile multipartFile) throws PrintersServerException
+	{
+		if (multipartFile.isEmpty())
+		{
+			String errorString = "El fichero " + multipartFile.getOriginalFilename() + " está vacío" ;
+            
+			log.error(errorString) ;
+			throw new PrintersServerException(Constants.ERR_IOEXCEPTION_GETTING_METAINFO_PDF, errorString) ;
+        }
+		
+		try
+		{
+			// Cargamos el PDF
+			PDDocument pdDocument = Loader.loadPDF(multipartFile.getBytes()) ;
+			
+			 // Obtenemos el tamaño del archivo en bytes y convertirlo a kilobytes
+            long fileSizeInKB 	  = multipartFile.getSize() / 1024 ;
+			
+			// Obtenemos el número de páginas
+			double numeroPaginasPdf  = pdDocument.getNumberOfPages() ;
+			
+			// Validamos si está a doble cara
+			boolean dobleCara 	  = Constants.SIDES_DOUBLE_SIDE.equals(sides) ;
+
+			// Calculamos el número de hojas totales
+			double hojasTotales 	  = numeroPaginasPdf ;
+			if (dobleCara)
+			{
+				hojasTotales = Math.ceil(numeroPaginasPdf / 2) ;
+			}
+			
+			// Las hojas totales las multiplicamos por el número de copias
+			hojasTotales = hojasTotales * numCopies ;
+			
+			// Guardo todo en un objeto que contenga esta información
+			return new PdfMetaInfo(multipartFile.getOriginalFilename(), fileSizeInKB, (int) numeroPaginasPdf, (int) hojasTotales) ;
+		}
+		catch (IOException ioException)
+		{
+			String errorString = "IOException mientras se leía la metainformación del fichero PDF: " + multipartFile.getOriginalFilename() ;
+			
+			log.error(errorString, ioException) ;
+			throw new PrintersServerException(Constants.ERR_IOEXCEPTION_GETTING_METAINFO_PDF, errorString, ioException) ;
+		}
+	}
+
 	/**
 	 * Endpoint que guarda las impresoras guardadas en base de datos
 	 * @param listPrinters lista de impresoras actuales
