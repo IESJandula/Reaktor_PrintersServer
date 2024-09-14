@@ -8,7 +8,7 @@ El proyecto `PrintersServer` es un microservicio diseñado para gestionar las so
 `CORSConfig` configura Cross-Origin Resource Sharing (CORS) para permitir solicitudes desde diferentes dominios. Define qué orígenes, métodos HTTP y encabezados están permitidos al interactuar con el microservicio `PrintersServer`.
 
 ### InicializacionSistema
-`InicializacionSistema` es una clase encargada de la inicialización y configuración del sistema cuando se inicia el microservicio. Actualmente se encarga de montar la estructura de carpetas externa para el fat-jar, es decir, preparar del entorno de ejecución para el servidor de impresoras, y de almacenar en BBDD los días festivos..
+`InicializacionSistema` es una clase encargada de la inicialización y configuración del sistema cuando se inicia el microservicio. Actualmente se encarga de montar la estructura de carpetas externa para el fat-jar, es decir, preparar del entorno de ejecución para el servidor de impresoras, y de almacenar en BBDD los días festivos.
 
 ## Data Transfer Objects (DTOs)
 
