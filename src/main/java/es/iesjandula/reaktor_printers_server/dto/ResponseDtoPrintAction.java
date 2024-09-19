@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class ResponseDtoPrintAction
 {
+	/** Atributo - id */
+	private Long id ; 
+	
 	/** Atributo - User */
 	private String user ; 
 	

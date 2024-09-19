@@ -28,9 +28,13 @@ public class Constants
 	/** Constante - Estado - ERROR */
 	public static final String STATE_ERROR 	 	 = "Error" ;
 	
-	/** Constante - Lista de estados */
-	public static final List<String> STATES_LIST = Arrays.asList(new String[] { STATE_TODO, STATE_SEND, STATE_DONE, STATE_ERROR } ) ;
+	/** Constante - Estado - CANCELED */
+	public static final String STATE_CANCELED 	 = "Cancelada" ;
 	
+	/** Constante - Lista de estados */
+	public static final List<String> STATES_LIST = Arrays.asList(new String[] { STATE_TODO, STATE_SEND, 
+																				STATE_DONE, STATE_ERROR, 
+																				STATE_CANCELED } ) ;
 	
 	/*********************************************************/
 	/********************* Orientacion ***********************/
@@ -107,6 +111,18 @@ public class Constants
 	
 	/** Error - Mientras se conseguía la metainformación del fichero PDF */
 	public static final int ERR_IOEXCEPTION_GETTING_METAINFO_PDF  = 110 ;
+	
+	/** Error - Usuario trató de cancelar una tarea que no existe */
+	public static final int ERR_USER_TRIED_TO_CANCEL_NO_EXISTING_TASK = 111 ;
+	
+	/** Error - Usuario trató de cancelar una tarea no pendiente */
+	public static final int ERR_USER_TRIED_TO_CANCEL_NO_PENDING_TASK = 112 ;
+	
+	/** Error - Usuario trató de cancelar una tarea que no pertenecía a este */
+	public static final int ERR_USER_TRIED_TO_CANCEL_ANOTHER_USER_TASK = 113 ;
+	
+	/** Error - Usuario trató de cancelar una tarea que no existía el PDF en el sistema */
+	public static final int ERR_USER_TRIED_TO_CANCEL_WITHOUT_PDF_IN_SYSTEM = 113 ;
 	
 
 	/*********************************************************/

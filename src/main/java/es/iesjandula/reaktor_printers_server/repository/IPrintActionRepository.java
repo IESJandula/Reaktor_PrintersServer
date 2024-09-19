@@ -17,7 +17,7 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 {
 	public List<PrintAction> findByStatusOrderByDateAsc(String status) ;
 	
-	@Query("SELECT new es.iesjandula.reaktor_printers_server.dto.ResponseDtoPrintAction(p.user, p.printer, p.status, p.fileName, "   +
+	@Query("SELECT new es.iesjandula.reaktor_printers_server.dto.ResponseDtoPrintAction(p.id, p.user, p.printer, p.status, p.fileName, "   +
 			 																		   "p.copies, p.color, p.orientation, p.sides, " +
 			 																		   "p.date, p.errorMessage, p.fileSizeInKB, " 	 + 
 			 																		   "p.numeroPaginasPdf, p.hojasTotales) "   +

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.iesjandula.base.base_server.firebase.AuthorizationService;
+import es.iesjandula.base.base_server.firebase.Usuario;
 import es.iesjandula.base.base_server.utils.BaseServerConstants;
 import es.iesjandula.base.base_server.utils.BaseServerException;
 import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
@@ -269,10 +270,10 @@ public class PrinterRest
 	    LocalTime horaActual  = LocalTime.now() ;
 
 	    // Verificamos si es fuera del horario permitido (antes de las 8 o después de las 20 de lunes a viernes)
-	    if (diaActual == DayOfWeek.SATURDAY || diaActual == DayOfWeek.SUNDAY || horaActual.isBefore(LocalTime.of(7, 45)) || horaActual.isAfter(LocalTime.of(20, 30)))
-	    {
-	    	responseDtoGlobalState.setGlobalError("Impresión no permitida. Activa de lunes a viernes de 7:45 a 20:30") ;
-	    }
+//	    if (diaActual == DayOfWeek.SATURDAY || diaActual == DayOfWeek.SUNDAY || horaActual.isBefore(LocalTime.of(7, 45)) || horaActual.isAfter(LocalTime.of(20, 30)))
+//	    {
+	    	responseDtoGlobalState.setGlobalError("Impresión no permitida"); //. Activa de lunes a viernes de 7:45 a 20:30") ;
+//	    }
 	    
 	    if (responseDtoGlobalState.getGlobalError() == null)
 	    {
@@ -410,6 +411,10 @@ public class PrinterRest
 		{
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
+		catch (PrintersServerException printersServerException)
+		{
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(printersServerException.getBodyExceptionMessage()) ;
+		}
 	    catch (Exception exception) 
 	    {
 	        PrintersServerException printersServerException = 
@@ -420,6 +425,124 @@ public class PrinterRest
 			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
+	}
+	
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/web/cancel")
+	public ResponseEntity<?> cancelarImpresion(@RequestHeader("Authorization") String authorizationHeader,
+											   @RequestParam(required = true) Long id)
+	{
+		try
+		{
+			// Primero autorizamos la petición y obtenemos la información del usuario
+			Usuario usuario = this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+			
+			// Buscamos la tarea de impresión por id
+			Optional<PrintAction> optionalPrintAction = this.printActionRepository.findById(id) ;
+			
+            // Si existe la impresión ...
+            if (!optionalPrintAction.isPresent())
+            {
+    			String infoUsuario = "ID: " + id + ", usuario: " + usuario.getNombre() + " " + usuario.getApellidos() + ". " ;
+    			String errorString = "Se intentó cancelar una tarea que no existe" ;
+    			
+    			log.error(infoUsuario + errorString) ;
+    			throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_CANCEL_NO_EXISTING_TASK, errorString) ;
+            }
+            
+        	// Obtenemos el valor
+        	PrintAction printAction = optionalPrintAction.get() ;
+        	
+        	// Borramos el fichero PDF y la carpeta del sistema
+        	this.borrarFicheroPdfYcarpetaDelSistema(id, usuario, printAction) ;
+        	
+        	// Validamos la cancelación
+        	this.cancelarImpresionValidacion(id, usuario, printAction) ;
+        	
+        	// Cambiamos el valor a cancelar
+        	printAction.setStatus(Constants.STATE_CANCELED) ;
+        	
+        	// Actualizamos la BBDD
+        	this.printActionRepository.saveAndFlush(printAction) ;
+            
+            return ResponseEntity.ok().build() ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
+		catch (PrintersServerException printersServerException)
+		{
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	    catch (Exception exception) 
+	    {
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+        										BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
+										 		exception) ;
+	        
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+	    }
+	}
+
+	/**
+	 * @param id id de la tarea
+	 * @param usuario usuario que la cancela
+	 * @param printAction tarea a cancelar
+	 * @throws PrintersServerException con un error
+	 */
+	private void cancelarImpresionValidacion(Long id, Usuario usuario, PrintAction printAction) throws PrintersServerException
+	{
+		// Si la tarea no está pendiente, no se puede cancelar
+		if (!printAction.getStatus().equals(Constants.STATE_TODO))
+		{
+			String infoUsuario = "ID: " + id + ", usuario: " + usuario.getNombre() + " " + usuario.getApellidos() + ". " ;
+			String errorString = "Se intentó cancelar una tarea que no está pendiente" ;
+			
+			log.error(infoUsuario + errorString) ;
+			throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_CANCEL_NO_PENDING_TASK, errorString) ;
+		}
+		
+		// Obtenemos el nombre y apellidos del usuario
+		String nombreYapellidos = usuario.getNombre() + " " + usuario.getApellidos() ;
+		
+		// Si el usuario trató de cancelar una tarea que no era suya, devolver error
+		if (!printAction.getUser().equals(nombreYapellidos))
+		{
+			String infoUsuario = "ID: " + id + ", usuario: " + usuario.getNombre() + " " + usuario.getApellidos() + ". " ;
+			String errorString = "Se intentó cancelar una tarea que no era suya" ;
+			
+			log.error(infoUsuario + errorString) ;
+			throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_CANCEL_ANOTHER_USER_TASK, errorString) ;           		
+		}
+	}
+	
+	/**
+	 * @param id id de la tarea
+	 * @param usuario usuario que la cancela
+	 * @param printAction tarea a cancelar
+	 * @throws PrintersServerException con un error
+	 */
+	private void borrarFicheroPdfYcarpetaDelSistema(Long id, Usuario usuario, PrintAction printAction) throws PrintersServerException
+	{
+    	File carpetaFichero = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ; 
+        File ficheroAborrar = new File(carpetaFichero, printAction.getFileName()) ;
+        
+        // Si no existe, generar una excepción
+        if (!ficheroAborrar.exists())
+        {
+			String infoUsuario = "ID: " + id + ", usuario: " + usuario.getNombre() + " " + usuario.getApellidos() + ". " ;
+			String errorString = "Se intentó cancelar una tarea que no tenía PDF en el sistema" ;
+			
+			log.error(infoUsuario + errorString) ;
+			throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_CANCEL_WITHOUT_PDF_IN_SYSTEM, errorString) ;             	
+        }
+        
+        // Borramos primero el fichero y después el directorio
+        ficheroAborrar.delete() ;
+        carpetaFichero.delete() ;
 	}
 	
 	/**
