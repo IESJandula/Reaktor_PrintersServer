@@ -85,8 +85,6 @@ public class InicializacionSistema
 	    	printersServerConfig.copyToDirectory(this.carpetaConImpresionesPendientes) ;
 	    }
 	    
-	    this.inicializarSistemaConConstantes() ;
-	    
 		// Si estamos creando la BBDD, entonces creamos las constantes por defecto
 		if (Constants.MODO_DDL_CREATE.equalsIgnoreCase(this.modoDdl))
 		{
