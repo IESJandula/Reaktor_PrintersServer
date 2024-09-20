@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,9 @@ import es.iesjandula.base.base_server.resources_handler.ResourcesHandler;
 import es.iesjandula.base.base_server.resources_handler.ResourcesHandlerFile;
 import es.iesjandula.base.base_server.resources_handler.ResourcesHandlerJar;
 import es.iesjandula.base.base_server.utils.BaseServerException;
+import es.iesjandula.reaktor_printers_server.models.Constante;
 import es.iesjandula.reaktor_printers_server.models.DiaFestivo;
+import es.iesjandula.reaktor_printers_server.repository.IConstanteRepository;
 import es.iesjandula.reaktor_printers_server.repository.IDiaFestivoRepository;
 import es.iesjandula.reaktor_printers_server.utils.Constants;
 import es.iesjandula.reaktor_printers_server.utils.ConversorFechasHoras;
@@ -36,9 +39,27 @@ public class InicializacionSistema
 {
     @Autowired
     private IDiaFestivoRepository diaFestivoRepository ;
+    
+    @Autowired
+    private IConstanteRepository constantesRepository ;
 
 	@Value("${spring.jpa.hibernate.ddl-auto}")
 	private String modoDdl ;
+	
+	@Value("${" + Constants.PARAM_YAML_IMPRESION_DESHABILITADA + "}")
+	private String appDeshabilitada ;
+	
+	@Value("${" + Constants.PARAM_YAML_HORA_INICIO_IMPRESION + "}")
+	private String horaInicioImpresion ;
+	
+	@Value("${" + Constants.PARAM_YAML_HORA_FIN_IMPRESION + "}")
+	private String horaFinImpresion ;
+	
+	@Value("${" + Constants.PARAM_YAML_DIA_ESPECIAL_IMPRESION + "}")
+	private String diaEspecialImpresion ;
+	
+	@Value("${" + Constants.PARAM_YAML_MAXIMO_HOJAS_IMPRESION + "}")
+	private String maximoHojasImpresion ;
 	
     /** Atributo - Carpeta con impresiones pendientes */
     private File carpetaConImpresionesPendientes ;
@@ -64,10 +85,16 @@ public class InicializacionSistema
 	    	printersServerConfig.copyToDirectory(this.carpetaConImpresionesPendientes) ;
 	    }
 	    
+	    this.inicializarSistemaConConstantes() ;
+	    
 		// Si estamos creando la BBDD, entonces creamos las constantes por defecto
 		if (Constants.MODO_DDL_CREATE.equalsIgnoreCase(this.modoDdl))
 		{
+			// Cargamos los días festivos desde el CSV
 			this.cargarDiasFestivosDesdeCSVInternal() ;
+			
+			// Inicializamos las constantes
+			this.inicializarSistemaConConstantes() ;
 		}
 	}
 	
@@ -209,4 +236,39 @@ public class InicializacionSistema
 			}	
 		}
 	}
+	
+	/**
+	 * Este método se encarga de inicializar el sistema con las constantes siempre que estemos 
+	 * creando la base de datos ya sea en el entorno de desarrollo o ejecutando JAR
+	 */
+	private void inicializarSistemaConConstantes()
+	{
+		this.cargarPropiedad(Constants.TABLA_CONST_IMPRESION_DESHABILITADA, this.appDeshabilitada) ;
+		this.cargarPropiedad(Constants.TABLA_CONST_HORA_INICIO_IMPRESION,   this.horaInicioImpresion) ;
+		this.cargarPropiedad(Constants.TABLA_CONST_HORA_FIN_IMPRESION,      this.horaFinImpresion) ;
+		this.cargarPropiedad(Constants.TABLA_CONST_DIA_ESPECIAL_IMPRESION,  this.diaEspecialImpresion) ;
+		this.cargarPropiedad(Constants.TABLA_CONST_MAXIMO_HOJAS_IMPRESION,  this.maximoHojasImpresion) ;
+	}
+	
+	/**
+	 * @param key clave
+	 * @param value valor
+	 */
+	private void cargarPropiedad(String key, String value)
+	{
+		// Verificamos si tiene algún valor
+        Optional<Constante> property = this.constantesRepository.findById(key) ;
+        
+        // Si está vacío, lo seteamos con el valor del YAML
+        if (property.isEmpty())
+        {
+        	Constante constante = new Constante() ;
+        	
+            constante.setClave(key) ;
+            constante.setValor(value) ;
+            
+            // Almacenamos la constante en BBDD
+            this.constantesRepository.save(constante) ;
+        }
+    }
 }

@@ -31,3 +31,9 @@ reaktor:
   urlCors: https://somos.iesjandula.es
   firebase_server_url: https://somos.iesjandula.es
   uidFile: ${UID_FILE}
+  constantes:
+    impresionDeshabilitada: ""
+    horaInicioImpresion: "7:45" 
+    horaFinImpresion: "20:30"
+    diaEspecialImpresion: "false"
+    maximoHojasImpresion: "50"

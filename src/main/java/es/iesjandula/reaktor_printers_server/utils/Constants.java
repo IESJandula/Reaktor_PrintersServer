@@ -124,6 +124,9 @@ public class Constants
 	/** Error - Usuario trató de cancelar una tarea que no existía el PDF en el sistema */
 	public static final int ERR_USER_TRIED_TO_CANCEL_WITHOUT_PDF_IN_SYSTEM = 113 ;
 	
+	/** Error - Propiedad constante no encontrada en el sistema */
+	public static final int ERR_CONSTANT_PROPERTY_NOT_FOUND = 114 ;
+	
 
 	/*********************************************************/
 	/****************** Ficheros y carpetas ******************/
@@ -166,5 +169,44 @@ public class Constants
 	/** Constante - Header - Caras */
 	public static final String HEADER_PRINT_SIDES = "sides" ;
 
+	
+	/*********************************************************/
+	/****************** Tabla Constantes *********************/
+	/*********************************************************/
+	
+	/** Constante - Tabla Constantes - APP Deshabilitada */
+	public static final String TABLA_CONST_IMPRESION_DESHABILITADA = "Impresion Deshabilitada" ;
+	
+	/** Constante - Tabla Constantes - Hora inicio impresión */
+	public static final String TABLA_CONST_HORA_INICIO_IMPRESION   = "Hora inicio impresion" ;
+	
+	/** Constante - Tabla Constantes - Hora fin impresión */
+	public static final String TABLA_CONST_HORA_FIN_IMPRESION      = "Hora fin impresion" ;
+	
+	/** Constante - Tabla Constantes - Día especial impresión */
+	public static final String TABLA_CONST_DIA_ESPECIAL_IMPRESION  = "Dia especial impresion" ;
+	
+	/** Constante - Tabla Constantes - Hojas impresión */
+	public static final String TABLA_CONST_MAXIMO_HOJAS_IMPRESION  = "Maximo hojas impresion" ;
+	
+	
+	/*********************************************************/
+	/******************* Parámetros YAML *********************/
+	/*********************************************************/
+	
+	/** Constante - Parámetros YAML - Impresión Deshabilitada */
+	public static final String PARAM_YAML_IMPRESION_DESHABILITADA = "reaktor.constantes.impresionDeshabilitada" ;
+	
+	/** Constante - Parámetros YAML - Hora inicio impresión */
+	public static final String PARAM_YAML_HORA_INICIO_IMPRESION   = "reaktor.constantes.horaInicioImpresion" ;
+	
+	/** Constante - Parámetros YAML - Hora fin impresión */
+	public static final String PARAM_YAML_HORA_FIN_IMPRESION      = "reaktor.constantes.horaFinImpresion" ;
+	
+	/** Constante - Parámetros YAML - Día especial impresión */
+	public static final String PARAM_YAML_DIA_ESPECIAL_IMPRESION  = "reaktor.constantes.diaEspecialImpresion" ;
+	
+	/** Constante - Parámetros YAML - Hojas impresión */
+	public static final String PARAM_YAML_MAXIMO_HOJAS_IMPRESION  = "reaktor.constantes.maximoHojasImpresion" ;
 }
 
