@@ -15,8 +15,6 @@ import java.util.Optional;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,14 +30,13 @@ import es.iesjandula.base.base_server.firebase.DtoUsuario;
 import es.iesjandula.base.base_server.utils.BaseServerConstants;
 import es.iesjandula.base.base_server.utils.BaseServerException;
 import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
-import es.iesjandula.reaktor_printers_server.dto.DtoPrinters;
+import es.iesjandula.reaktor_printers_server.dto.DtoConstante;
 import es.iesjandula.reaktor_printers_server.dto.RequestDtoPrintQuery;
 import es.iesjandula.reaktor_printers_server.dto.ResponseDtoGlobalState;
 import es.iesjandula.reaktor_printers_server.dto.ResponseDtoPrintAction;
 import es.iesjandula.reaktor_printers_server.models.Constante;
 import es.iesjandula.reaktor_printers_server.models.DiaFestivo;
 import es.iesjandula.reaktor_printers_server.models.PrintAction;
-import es.iesjandula.reaktor_printers_server.models.Printer;
 import es.iesjandula.reaktor_printers_server.repository.IConstanteRepository;
 import es.iesjandula.reaktor_printers_server.repository.IDiaFestivoRepository;
 import es.iesjandula.reaktor_printers_server.repository.IPrintActionRepository;
@@ -54,9 +51,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author Francisco Manuel Benítez Chico
  */
 @RestController
-@RequestMapping("/printers")
+@RequestMapping("/printers/web")
 @Slf4j
-public class PrinterRest
+public class PrinterRestWeb
 {
     @Autowired
     private InicializacionSistema inicializacionCarpetas ;
@@ -65,7 +62,7 @@ public class PrinterRest
 	private IPrinterRepository printerRepository ;
 
 	@Autowired
-	private IPrintActionRepository printActionRepository;
+	private IPrintActionRepository printActionRepository ;
 	
 	@Autowired
 	private IDiaFestivoRepository diaFestivoRepository ;
@@ -78,9 +75,10 @@ public class PrinterRest
 
 	/**
 	 * Devuelve las impresoras guardadas en base de datos
+	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de impresoras
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/web/printers")
+	@RequestMapping(method = RequestMethod.GET, value = "/printers")
 	public ResponseEntity<?> obtenerImpresoras(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		try
@@ -108,9 +106,10 @@ public class PrinterRest
 	}
 	
 	/**
+	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de estados disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/web/states")
+	@RequestMapping(method = RequestMethod.GET, value = "/states")
 	public ResponseEntity<?> obtenerEstados(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		try
@@ -138,9 +137,10 @@ public class PrinterRest
 	}
 	
 	/**
+	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de orientaciones disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/web/orientations")
+	@RequestMapping(method = RequestMethod.GET, value = "/orientations")
 	public ResponseEntity<?> obtenerOrientaciones(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		try
@@ -168,9 +168,10 @@ public class PrinterRest
 	}
 	
 	/**
+	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de colores disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/web/colors")
+	@RequestMapping(method = RequestMethod.GET, value = "/colors")
 	public ResponseEntity<?> obtenerColores(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		try
@@ -198,9 +199,10 @@ public class PrinterRest
 	}
 	
 	/**
+	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de caras disponibles
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/web/sides")
+	@RequestMapping(method = RequestMethod.GET, value = "/sides")
 	public ResponseEntity<?> obtenerCaras(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		try
@@ -227,7 +229,11 @@ public class PrinterRest
 		}
 	}
 	
-	@RequestMapping(method = RequestMethod.GET, value = "/web/validations")
+	/**
+	 * @param authorizationHeader token JWT de autorización
+	 * @return response Dto Global State
+	 */
+	@RequestMapping(method = RequestMethod.GET, value = "/validations")
 	public ResponseEntity<?> validacionesGlobalesPreviasImpresion(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		ResponseDtoGlobalState responseDtoGlobalState = new ResponseDtoGlobalState() ;
@@ -384,9 +390,15 @@ public class PrinterRest
 	        horaActual.isBefore(LocalTime.of(horaInicioImpresionHora, horaInicioImpresionMinutos)) || 
 	        horaActual.isAfter(LocalTime.of(horaFinImpresionHora, horaFinImpresionMinutos)))
 	    {
+
+	    	String horaInicioImpresionHoraString 	= horaInicioImpresion[0] ;
+	    	String horaInicioImpresionMinutosString = horaInicioImpresion[1] ;
+	    	String horaFinImpresionHoraString       = horaFinImpresion[0] ;
+	    	String horaFinImpresionMinutosString    = horaFinImpresion[1] ;
+	    	
 	    	responseDtoGlobalState.setGlobalError("Impresión no permitida. Activa de lunes a viernes de " + 
-	    										  horaInicioImpresionHora + ":" + horaInicioImpresionMinutos + " a " +
-	    										  horaFinImpresionHora 	  + ":" + horaFinImpresionMinutos) ;
+	    			horaInicioImpresionHoraString + ":" + horaInicioImpresionMinutosString + " a " +
+	    			horaFinImpresionHoraString 	  + ":" + horaFinImpresionMinutosString) ;
 	    }
 	}
 	
@@ -418,10 +430,11 @@ public class PrinterRest
 	
 	/**
 	 * Devuelve las impresiones filtradas por los parametros pasados como parametro, si no se envia ninguno manda todos
+	 * @param authorizationHeader token JWT de autorización
 	 * @param printerQuery parámetros de la query
 	 * @return lista de ResponseDtoPrintAction con aquellos encontrados
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/web/filter")
+	@RequestMapping(method = RequestMethod.POST, value = "/filter")
 	public ResponseEntity<?> buscarImpresiones(@RequestHeader("Authorization") String authorizationHeader,
 											   @RequestBody(required = true) RequestDtoPrintQuery printQuery) 
 	{
@@ -461,6 +474,7 @@ public class PrinterRest
 	
 	/**
 	 * Guarda en base de datos la peticion de impresion realizada desde la web y guarda el documento en el servidor
+	 * @param authorizationHeader token JWT de autorización
 	 * @param printer impresora
 	 * @param numCopies número de copias
 	 * @param orientation horizontal o vertical
@@ -470,7 +484,7 @@ public class PrinterRest
 	 * @param file fichero
 	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/web/print", consumes = "multipart/form-data")
+	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
 	public ResponseEntity<?> imprimirPdf(@RequestHeader("Authorization") String authorizationHeader,
 										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
@@ -546,7 +560,12 @@ public class PrinterRest
 	}
 	
 	
-	@RequestMapping(method = RequestMethod.POST, value = "/web/cancel")
+	/**
+	 * @param authorizationHeader token JWT de autorización
+	 * @param id identificador de la impresión
+	 * @return 200 si todo fue bien y error en otro caso
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/cancel")
 	public ResponseEntity<?> cancelarImpresion(@RequestHeader("Authorization") String authorizationHeader,
 											   @RequestParam(required = true) Long id)
 	{
@@ -715,210 +734,79 @@ public class PrinterRest
 			throw new PrintersServerException(Constants.ERR_IOEXCEPTION_GETTING_METAINFO_PDF, errorString, ioException) ;
 		}
 	}
-
+	
 	/**
-	 * Endpoint que guarda las impresoras guardadas en base de datos
-	 * @param listPrinters lista de impresoras actuales
-	 * @return ok si se guarda correctamente
+	 * @param authorizationHeader token JWT de autorización
+	 * @return la lista de constantes disponibles
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/client/printers", consumes = "application/json")
-	public ResponseEntity<?> actualizarImpresorasActuales(@RequestHeader("Authorization") String authorizationHeader,
-														  @RequestBody(required = true) List<DtoPrinters> listPrinters)
+	@RequestMapping(method = RequestMethod.GET, value = "/constantes")
+	public ResponseEntity<?> actualizarConstantes(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		try
 		{
 			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_CLIENTE_IMPRESORA) ;
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
 			
-			// Iteramos sobre todas las impresoras recibidas
-            for (DtoPrinters dtoPrinter : listPrinters)
-            {
-                // Buscamos la impresora por nombre (clave primaria)
-                Optional<Printer> optionalPrinter = this.printerRepository.findById(dtoPrinter.getName()) ;
-
-                Printer printer = null ;
-                
-                // Si existe la impresora ...
-                if (optionalPrinter.isPresent())
-                {
-                    // ... la actualizamos
-                    printer = optionalPrinter.get() ;
-                    
-                    printer.setStatusId(dtoPrinter.getStatusId()) ;
-                    printer.setStatus(dtoPrinter.getStatus()) ;
-                    printer.setPrintingQueue(dtoPrinter.getPrintingQueue()) ;
-                    printer.setLastUpdate(dtoPrinter.getLastUpdate()) ;
-                }
-                else
-                {
-                    // Si no existe, creamos una nueva impresora
-                	printer = new Printer(dtoPrinter.getName(),
-                						  dtoPrinter.getStatusId(),
-                						  dtoPrinter.getStatus(),
-                						  dtoPrinter.getPrintingQueue(),
-                						  dtoPrinter.getLastUpdate()) ;
-                }
-                
-                // Actualizamos la base de datos
-                this.printerRepository.saveAndFlush(printer) ;
-            }
-
-            return ResponseEntity.ok().build();
+			// Obtenemos las constantes de BBDD
+			List<DtoConstante> dtoConstanteList = this.constantesRepository.findAllAsDto() ;
+			
+			// Devolvemos la lista de constantes
+			return ResponseEntity.ok().body(dtoConstanteList) ;
 		}
-	    catch (Exception exception) 
-	    {
-	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales",
-										 		exception) ;
-	        
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales", printersServerException) ;
-			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
-	    }
-	}
-
-	/**
-	 * Configura y envia a la maquina cliente la informacion para realizar la impresion
-	 * @return 
-	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/client/print")
-	public ResponseEntity<?> buscarTareaParaImprimir(@RequestHeader("Authorization") String authorizationHeader)
-	{
-		File carpetaFichero   = null ;
-		File ficheroAimprimir = null ;
-		
-	    try
-	    {
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_CLIENTE_IMPRESORA) ;
-	    	
-	        // Obtenemos todas las acciones con estado "TO DO" ordenadas por fecha ascendente
-	        List<PrintAction> actions = this.printActionRepository.findByStatusOrderByDateAsc(Constants.STATE_TODO) ;
-
-	        if (!actions.isEmpty())
-	        {
-	            // Obtenemos la primera tarea para imprimir (la más antigua)
-	        	PrintAction printAction = actions.get(0) ;
-
-	        	// Construimos la ruta de la carpeta del fichero
-	        	carpetaFichero = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ; 
-	        	
-	            // Construimos la ruta del fichero a partir de la configuración
-	            ficheroAimprimir = new File(carpetaFichero, printAction.getFileName()) ;
-
-	            // Leemos el contenido del fichero en bytes
-	            byte[] contenidoDelFichero = Files.readAllBytes(ficheroAimprimir.toPath()) ;
-
-	            // Creamos un InputStreamResource a partir del contenido leído
-	            InputStreamResource outcomeInputStreamResource = new InputStreamResource(new java.io.ByteArrayInputStream(contenidoDelFichero)) ;
-
-	            // Preparamos los headers de la respuesta HTTP
-	            HttpHeaders headers = printAction.generaCabecera(ficheroAimprimir) ;
-	            
-	            // Actualizamos el estado de la acción a "Enviado"
-	            printAction.setStatus(Constants.STATE_SEND) ;
-	            this.printActionRepository.saveAndFlush(printAction) ;
-
-	            // Devolvemos la respuesta con el archivo y los headers
-	            return ResponseEntity.ok().headers(headers).body(outcomeInputStreamResource) ;
-	        }
-
-	        // Si no hay acciones disponibles, devolvemos una respuesta vacía con estado 200
-	        return ResponseEntity.ok().build() ;
-	    }
-	    catch (IOException ioException)
-	    {
-	        String errorString = "IOException mientras se leía el contenido del fichero para enviar a imprimir" ;
-	        
-	        PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_IOEXCEPTION_FILE_READING_CODE, errorString, ioException) ;
-
-	        log.error(errorString, printersServerException) ;
-	        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
-	    }
-	    catch (Exception exception)
-	    {
-	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir",
-	                                            exception) ;
-
-	        log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir", printersServerException) ;
-	        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
-	    }
-	    finally
-	    {
-	    	// Si se cogió fichero para imprimir ...
-	    	if (ficheroAimprimir != null)
-	    	{
-	    		// ... lo borramos junto con la carpeta del id
-	    		
-	    		ficheroAimprimir.delete() ;
-	    		carpetaFichero.delete() ;
-	    	}
-	    }
-	}
-
-	/**
-	 * Obtiene la información de la maquina cliente de como se ha finalizado una printAction
-	 * @param id
-	 * @param status
-	 * @return
-	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/client/status")
-	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader("Authorization") String authorizationHeader,
-															 @RequestHeader(name = "id") String id,
-														     @RequestHeader(name = "status") String status,
-														     @RequestHeader(name = "message", required = false) String message,
-														     @RequestHeader(name = "exception", required = false) String exceptionMessage)
-	{
-		try
+		catch (BaseServerException baseServerException)
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_CLIENTE_IMPRESORA) ;
-
-			// Buscamos la tarea de impresión por id
-			Optional<PrintAction> action = this.printActionRepository.findById(Long.valueOf(id)) ;	
-			
-			// Si no la encontramos, informamos del error
-			if (!action.isPresent())
-			{
-				String errorString = "La tarea con id " + id + " no fue encontrada para actualizar su status a " + status ;
-				
-				log.error(errorString) ;
-				
-				PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_PRINT_ACTION_NOT_FOUND_BY_ID, errorString) ;
-		        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
-			}
-			
-			// Obtenemos la printAction
-			PrintAction printAction = action.get() ; 
-			
-			// Una vez encontrada, actualizamos su estado
-			printAction.setStatus(status) ;
-			
-			// Si el estado es "Error" entonces apuntamos el error
-			if (Constants.STATE_ERROR.equals(status))
-			{
-				// Seteamos el mensaje de error
-				printAction.setErrorMessage(message) ;
-				
-				// Logueamos el error como warning
-				log.warn(message + " con la excepción: " + exceptionMessage) ;
-			}
-			
-			// Guardamos en BBDD
-			this.printActionRepository.saveAndFlush(printAction) ;
-			
-			return ResponseEntity.ok().build();
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
 	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion",
-												exception) ;
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes",
+											    exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion", printersServerException) ;
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	}
+	
+	/**
+	 * @param 
+	 * @return la lista de constantes disponibles
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/constantes")
+	public ResponseEntity<?> actualizarConstantes(@RequestHeader("Authorization") String authorizationHeader,
+				  								  @RequestBody(required = true) List<DtoConstante> dtoConstanteList)
+	{
+		try
+		{
+			// Primero autorizamos la petición
+			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+			
+			// Iteramos y vamos actualizando los cambios
+			for (DtoConstante dtoConstante : dtoConstanteList)
+			{
+				// Creamos una instancia del modelo
+				Constante constante = new Constante(dtoConstante.getClave(), dtoConstante.getValor()) ;
+				
+				// Almacenamos en BBDD
+				this.constantesRepository.saveAndFlush(constante) ;
+			}
+			
+			// Devolvemos 200
+			return ResponseEntity.ok().build() ;
+		}
+		catch (BaseServerException baseServerException)
+		{
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes",
+											    exception) ;
+
+			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarConstantes", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}

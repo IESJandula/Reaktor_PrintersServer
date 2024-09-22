@@ -1,10 +1,13 @@
 package es.iesjandula.reaktor_printers_server.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import es.iesjandula.reaktor_printers_server.dto.DtoConstante;
 import es.iesjandula.reaktor_printers_server.models.Constante;
 
 /**
@@ -19,5 +22,9 @@ public interface IConstanteRepository extends JpaRepository<Constante, String>
      * @return constante encontrada
      */
 	Optional<Constante> findByClave(String clave) ;
+	
+	@Query("SELECT new es.iesjandula.reaktor_printers_server.dto.DtoConstante(c.clave, c.valor) "   +
+		   "FROM Constante c")
+	List<DtoConstante> findAllAsDto() ;
 }
 
