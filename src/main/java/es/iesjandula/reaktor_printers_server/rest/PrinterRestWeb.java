@@ -243,8 +243,8 @@ public class PrinterRestWeb
 			// Primero autorizamos la petición
 			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
 
-			// Validamos el día actual
-			this.validacionesGlobalesPreviasImpresionInternal(responseDtoGlobalState) ;
+			// Llamada al método interno para obtener error global si existiera
+			responseDtoGlobalState.setGlobalError(this.validacionesGlobalesPreviasImpresionInternal()) ;
 			
 			// Obtenemos las impresoras y sus estados
 			responseDtoGlobalState.setDtoPrinters(this.printerRepository.getPrinters()) ;
@@ -270,164 +270,6 @@ public class PrinterRestWeb
 	    return ResponseEntity.ok().body(responseDtoGlobalState) ;
 	}
 
-	/**
-	 * @param responseDtoGlobalState Response DTO Global State 
-	 * @throws PrintersServerException con un error
-	 */
-	private void validacionesGlobalesPreviasImpresionInternal(ResponseDtoGlobalState responseDtoGlobalState) throws PrintersServerException
-	{
-	    // Obtener la fecha y hora actual
-	    LocalDate fechaActual = LocalDate.now() ;
-	    
-	    // Vemos si está deshabilitada la impresion
-	    this.validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada(responseDtoGlobalState) ;
-	    
-		// Vemos si estamos en un día especial
-	    boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion(responseDtoGlobalState) ;
-	    
-	    if (!diaEspecialImpresion)
-	    {
-		    if (responseDtoGlobalState.getGlobalError() == null)
-		    {
-			    // Vemos si se cumplen los horarios de impresión
-			    this.validacionesGlobalesPreviasImpresionInternalHoraPermitida(responseDtoGlobalState, fechaActual) ;
-		    }
-
-		    if (responseDtoGlobalState.getGlobalError() == null)
-		    {
-		    	// Vemos si no estamos en día de fiesta
-		    	this.validacionesGlobalesPreviasImpresionInternalDiaFiesta(responseDtoGlobalState, fechaActual) ;
-		    }
-	    }
-	}
-
-	/**
-	 * @param responseDtoGlobalState Response DTO Global State 
-	 * @throws PrintersServerException con un error
-	 */
-	private boolean validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion(ResponseDtoGlobalState responseDtoGlobalState)
-					throws PrintersServerException
-	{
-	    Optional<Constante> optionalHoraInicioImpresion = this.constantesRepository.findByClave(Constants.TABLA_CONST_DIA_ESPECIAL_IMPRESION) ;
-	    if (!optionalHoraInicioImpresion.isPresent())
-	    {
-	    	String errorString = "Error obteniendo parametros" ;
-	    	
-	    	log.error(errorString + ". " + Constants.TABLA_CONST_DIA_ESPECIAL_IMPRESION) ;
-	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
-	    }
-	    
-	    // Devolvemos el valor
-		return Boolean.valueOf(optionalHoraInicioImpresion.get().getValor()) ;
-	}
-
-	/**
-	 * @param responseDtoGlobalState Response DTO Global State 
-	 * @throws PrintersServerException con un error
-	 */
-	private void validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada(ResponseDtoGlobalState responseDtoGlobalState) 
-				 throws PrintersServerException
-	{
-		// Vemos si la impresión está deshabilitada
-	    Optional<Constante> optionalAppDeshabilitada = this.constantesRepository.findByClave(Constants.TABLA_CONST_IMPRESION_DESHABILITADA) ;
-	    if (!optionalAppDeshabilitada.isPresent())
-	    {
-	    	String errorString = "Error obteniendo parametros" ;
-	    	
-	    	log.error(errorString + ". " + Constants.TABLA_CONST_IMPRESION_DESHABILITADA) ;
-	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
-	    }
-	    	
-	    if (!optionalAppDeshabilitada.get().getValor().isEmpty())
-	    {
-	    	responseDtoGlobalState.setGlobalError(optionalAppDeshabilitada.get().getValor()) ;
-	    }
-	}
-	
-	/**
-	 * @param responseDtoGlobalState Response DTO Global State 
-	 * @param fechaActual fecha actual
-	 */
-	private void validacionesGlobalesPreviasImpresionInternalHoraPermitida(ResponseDtoGlobalState responseDtoGlobalState, LocalDate fechaActual) 
-				 throws PrintersServerException
-	{
-	    DayOfWeek diaActual   = fechaActual.getDayOfWeek() ;
-	    LocalTime horaActual  = LocalTime.now() ;
-		
-		// Obtenemos la hora de inicio impresion
-	    Optional<Constante> optionalHoraInicioImpresion = this.constantesRepository.findByClave(Constants.TABLA_CONST_HORA_INICIO_IMPRESION) ;
-	    if (!optionalHoraInicioImpresion.isPresent())
-	    {
-	    	String errorString = "Error obteniendo parametros" ;
-	    	
-	    	log.error(errorString + ". " + Constants.TABLA_CONST_HORA_INICIO_IMPRESION) ;
-	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
-	    }
-	    
-		// Obtenemos la hora de fin impresion
-	    Optional<Constante> optionalHoraFinImpresion = this.constantesRepository.findByClave(Constants.TABLA_CONST_HORA_FIN_IMPRESION) ;
-	    if (!optionalHoraFinImpresion.isPresent())
-	    {
-	    	String errorString = "Error obteniendo parametros" ;
-	    	
-	    	log.error(errorString + ". " + Constants.TABLA_CONST_HORA_FIN_IMPRESION) ;
-	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
-	    }
-	    
-	    // Hacemos split de ambas
-	    String[] horaInicioImpresion = optionalHoraInicioImpresion.get().getValor().split(":") ;
-	    String[] horaFinImpresion 	 = optionalHoraFinImpresion.get().getValor().split(":") ;
-	    	
-	    // Obtenemos los valores numéricos
-	    int horaInicioImpresionHora    = Integer.valueOf(horaInicioImpresion[0]) ;
-	    int horaInicioImpresionMinutos = Integer.valueOf(horaInicioImpresion[1]) ;
-	    int horaFinImpresionHora       = Integer.valueOf(horaFinImpresion[0]) ;
-	    int horaFinImpresionMinutos    = Integer.valueOf(horaFinImpresion[1]) ;
-	    
-	    // Verificamos si es fuera del horario permitido (antes de las 8 o después de las 20 de lunes a viernes)
-	    if (diaActual == DayOfWeek.SATURDAY ||
-	        diaActual == DayOfWeek.SUNDAY   || 
-	        horaActual.isBefore(LocalTime.of(horaInicioImpresionHora, horaInicioImpresionMinutos)) || 
-	        horaActual.isAfter(LocalTime.of(horaFinImpresionHora, horaFinImpresionMinutos)))
-	    {
-
-	    	String horaInicioImpresionHoraString 	= horaInicioImpresion[0] ;
-	    	String horaInicioImpresionMinutosString = horaInicioImpresion[1] ;
-	    	String horaFinImpresionHoraString       = horaFinImpresion[0] ;
-	    	String horaFinImpresionMinutosString    = horaFinImpresion[1] ;
-	    	
-	    	responseDtoGlobalState.setGlobalError("Impresión no permitida. Activa de lunes a viernes de " + 
-	    			horaInicioImpresionHoraString + ":" + horaInicioImpresionMinutosString + " a " +
-	    			horaFinImpresionHoraString 	  + ":" + horaFinImpresionMinutosString) ;
-	    }
-	}
-	
-	/**
-	 * @param responseDtoGlobalState Response DTO Global State 
-	 * @param fechaActual fecha actual
-	 */
-	private void validacionesGlobalesPreviasImpresionInternalDiaFiesta(ResponseDtoGlobalState responseDtoGlobalState, LocalDate fechaActual)
-	{
-    	try
-    	{
-    		// Convertimos LocalDate a Date usando el método de utilidad
-    		Date fechaActualDate = ConversorFechasHoras.convertirLocalDateToDate(fechaActual) ;
-    		
-    		// Verificamos si es un día festivo
-    		Optional<DiaFestivo> diaFestivoOptional = this.diaFestivoRepository.findByFecha(fechaActualDate);
-    		
-    		if (diaFestivoOptional.isPresent())
-    		{
-    			DiaFestivo diaFestivo = diaFestivoOptional.get() ;
-    			responseDtoGlobalState.setGlobalError("Impresión no permitida. Hoy es día festivo: " + diaFestivo.getDescripcion()) ;
-    		}
-    	}
-    	catch (ParseException parseException)
-    	{
-    		responseDtoGlobalState.setGlobalError("Error al leer los festivos: " + parseException.getMessage()) ;	
-    	}
-	}
-	
 	/**
 	 * Devuelve las impresiones filtradas por los parametros pasados como parametro, si no se envia ninguno manda todos
 	 * @param authorizationHeader token JWT de autorización
@@ -496,27 +338,20 @@ public class PrinterRestWeb
 			// Primero autorizamos la petición
 			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
 			
+			// Llamada al método interno para realizar las validaciones
+			String errorGlobal = this.validacionesGlobalesPreviasImpresionInternal() ;
+			
+			if (errorGlobal != null)
+			{
+				log.error(errorGlobal) ;
+				throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_PRINT_WITH_GLOBAL_ERROR, errorGlobal) ;
+			}
+			
 			// Obtenemos los metadatos del fichero PDF
 			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(numCopies, sides, file) ;
 			
-			// Creamos el objeto printAction con la configuracion recibida
-			PrintAction printAction = new PrintAction() ;
-			
-			printAction.setUser(user) ;
-			printAction.setPrinter(printer) ;
-			printAction.setStatus(Constants.STATE_TODO) ;
-			printAction.setFileName(pdfMetaInfo.getOriginalFilename()) ;
-			printAction.setCopies(numCopies) ;
-			printAction.setColor(color) ;
-			printAction.setOrientation(orientation) ;
-			printAction.setSides(sides) ;
-			printAction.setDate(new Date()) ;
-			printAction.setFileSizeInKB(pdfMetaInfo.getFileSizeInKB()) ;
-			printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;
-			printAction.setHojasTotales(pdfMetaInfo.getHojasTotales()) ;
-			
-			// Almacenamos la instancia en BBDD
-			this.printActionRepository.saveAndFlush(printAction) ;
+			// Creamos y almacenamos la printAction en BBDD
+			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, user, pdfMetaInfo);
 
 			// Creamos un directorio temporal donde guardar el fichero
 			File folder = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ;
@@ -557,6 +392,216 @@ public class PrinterRestWeb
 			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
+	}
+	
+	/**
+	 * @return error global si existiera
+	 * @throws PrintersServerException con un error
+	 */
+	private String validacionesGlobalesPreviasImpresionInternal() throws PrintersServerException
+	{
+		// Vemos si está deshabilitada la impresion
+		String outcome = this.validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada() ;
+		
+		if (outcome == null)
+		{
+			// Vemos si estamos en un día especial
+		    boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() ;
+		    
+		    if (!diaEspecialImpresion)
+		    {
+			    // Obtener la fecha y hora actual
+			    LocalDate fechaActual = LocalDate.now() ;
+		    	
+			    if (outcome == null)
+			    {
+				    // Vemos si se cumplen los horarios de impresión
+			    	outcome = this.validacionesGlobalesPreviasImpresionInternalHoraPermitida(fechaActual) ;
+			    }
+	
+			    if (outcome == null)
+			    {
+			    	// Vemos si no estamos en día de fiesta
+			    	outcome = this.validacionesGlobalesPreviasImpresionInternalDiaFiesta(fechaActual) ;
+			    }
+		    }
+		}
+	    
+	    return outcome ;
+	}
+
+	/**
+	 * @throws PrintersServerException con un error
+	 */
+	private boolean validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() throws PrintersServerException
+	{
+	    Optional<Constante> optionalHoraInicioImpresion = this.constantesRepository.findByClave(Constants.TABLA_CONST_DIA_ESPECIAL_IMPRESION) ;
+	    if (!optionalHoraInicioImpresion.isPresent())
+	    {
+	    	String errorString = "Error obteniendo parametros" ;
+	    	
+	    	log.error(errorString + ". " + Constants.TABLA_CONST_DIA_ESPECIAL_IMPRESION) ;
+	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
+	    }
+	    
+	    // Devolvemos el valor
+		return Boolean.valueOf(optionalHoraInicioImpresion.get().getValor()) ;
+	}
+
+	/**
+	 * @return error global si existiera
+	 * @throws PrintersServerException con un error
+	 */
+	private String validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada() throws PrintersServerException
+	{
+		String outcome = null ;
+		
+		// Vemos si la impresión está deshabilitada
+	    Optional<Constante> optionalAppDeshabilitada = this.constantesRepository.findByClave(Constants.TABLA_CONST_IMPRESION_DESHABILITADA) ;
+	    if (!optionalAppDeshabilitada.isPresent())
+	    {
+	    	String errorString = "Error obteniendo parametros" ;
+	    	
+	    	log.error(errorString + ". " + Constants.TABLA_CONST_IMPRESION_DESHABILITADA) ;
+	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
+	    }
+	    	
+	    if (!optionalAppDeshabilitada.get().getValor().isEmpty())
+	    {
+	    	outcome = optionalAppDeshabilitada.get().getValor() ;
+	    }
+	    
+	    return outcome ;
+	}
+	
+	/**
+	 * @param fechaActual fecha actual
+	 * @return error global si existiera
+	 * @throws PrintersServerException con un error
+	 */
+	private String validacionesGlobalesPreviasImpresionInternalHoraPermitida(LocalDate fechaActual) throws PrintersServerException
+	{
+		String outcome = null ;
+		
+	    DayOfWeek diaActual   = fechaActual.getDayOfWeek() ;
+	    LocalTime horaActual  = LocalTime.now() ;
+		
+		// Obtenemos la hora de inicio impresion
+	    Optional<Constante> optionalHoraInicioImpresion = this.constantesRepository.findByClave(Constants.TABLA_CONST_HORA_INICIO_IMPRESION) ;
+	    if (!optionalHoraInicioImpresion.isPresent())
+	    {
+	    	String errorString = "Error obteniendo parametros" ;
+	    	
+	    	log.error(errorString + ". " + Constants.TABLA_CONST_HORA_INICIO_IMPRESION) ;
+	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
+	    }
+	    
+		// Obtenemos la hora de fin impresion
+	    Optional<Constante> optionalHoraFinImpresion = this.constantesRepository.findByClave(Constants.TABLA_CONST_HORA_FIN_IMPRESION) ;
+	    if (!optionalHoraFinImpresion.isPresent())
+	    {
+	    	String errorString = "Error obteniendo parametros" ;
+	    	
+	    	log.error(errorString + ". " + Constants.TABLA_CONST_HORA_FIN_IMPRESION) ;
+	    	throw new PrintersServerException(Constants.ERR_CONSTANT_PROPERTY_NOT_FOUND, errorString) ;
+	    }
+	    
+	    // Hacemos split de ambas
+	    String[] horaInicioImpresion = optionalHoraInicioImpresion.get().getValor().split(":") ;
+	    String[] horaFinImpresion 	 = optionalHoraFinImpresion.get().getValor().split(":") ;
+	    	
+	    // Obtenemos los valores numéricos
+	    int horaInicioImpresionHora    = Integer.valueOf(horaInicioImpresion[0]) ;
+	    int horaInicioImpresionMinutos = Integer.valueOf(horaInicioImpresion[1]) ;
+	    int horaFinImpresionHora       = Integer.valueOf(horaFinImpresion[0]) ;
+	    int horaFinImpresionMinutos    = Integer.valueOf(horaFinImpresion[1]) ;
+	    
+	    // Verificamos si es fuera del horario permitido (antes de las 8 o después de las 20 de lunes a viernes)
+	    if (diaActual == DayOfWeek.SATURDAY ||
+	        diaActual == DayOfWeek.SUNDAY   || 
+	        horaActual.isBefore(LocalTime.of(horaInicioImpresionHora, horaInicioImpresionMinutos)) || 
+	        horaActual.isAfter(LocalTime.of(horaFinImpresionHora, horaFinImpresionMinutos)))
+	    {
+
+	    	String horaInicioImpresionHoraString 	= horaInicioImpresion[0] ;
+	    	String horaInicioImpresionMinutosString = horaInicioImpresion[1] ;
+	    	String horaFinImpresionHoraString       = horaFinImpresion[0] ;
+	    	String horaFinImpresionMinutosString    = horaFinImpresion[1] ;
+	    	
+	    	outcome = "Impresión no permitida. Activa de lunes a viernes de " + 
+	    									   horaInicioImpresionHoraString + ":" + horaInicioImpresionMinutosString + " a " +
+	    									   horaFinImpresionHoraString 	  + ":" + horaFinImpresionMinutosString ;
+	    }
+	    
+	    return outcome ;
+	}
+	
+	/**
+	 * @param fechaActual fecha actual
+	 * @return error global si existiera
+	 */
+	private String validacionesGlobalesPreviasImpresionInternalDiaFiesta(LocalDate fechaActual)
+	{
+		String outcome = null ;
+		
+    	try
+    	{
+    		// Convertimos LocalDate a Date usando el método de utilidad
+    		Date fechaActualDate = ConversorFechasHoras.convertirLocalDateToDate(fechaActual) ;
+    		
+    		// Verificamos si es un día festivo
+    		Optional<DiaFestivo> diaFestivoOptional = this.diaFestivoRepository.findByFecha(fechaActualDate);
+    		
+    		if (diaFestivoOptional.isPresent())
+    		{
+    			DiaFestivo diaFestivo = diaFestivoOptional.get() ;
+    			outcome = "Impresión no permitida. Hoy es día festivo: " + diaFestivo.getDescripcion() ;
+    		}
+    	}
+    	catch (ParseException parseException)
+    	{
+    		outcome = "Error al leer los festivos: " + parseException.getMessage() ;	
+    	}
+    	
+    	return outcome ;
+	}
+
+	/**
+	 * Creamos y almacenamos la print action en BBDD
+	 * @param printer impresora
+	 * @param numCopies número de copias
+	 * @param orientation horizontal o vertical
+	 * @param color color o blanco y negro
+	 * @param sides una cara o doble cara
+	 * @param user usuario
+	 * @param pdfMetaInfo PDF Meta information
+	 * @return la referencia a la nueva Print Action creada
+	 * @throws PrintersServerException con un error
+	 */
+	private PrintAction imprimirPdfCrearYalmacenarPrintAction(String printer, Integer numCopies, String orientation, String color,
+															  String sides,   String user,       PdfMetaInfo pdfMetaInfo) 
+						throws PrintersServerException
+	{
+		// Creamos el objeto printAction con la configuracion recibida
+		PrintAction printAction = new PrintAction() ;
+		
+		printAction.setUser(user) ;
+		printAction.setPrinter(printer) ;
+		printAction.setStatus(Constants.STATE_TODO) ;
+		printAction.setFileName(pdfMetaInfo.getOriginalFilename()) ;
+		printAction.setCopies(numCopies) ;
+		printAction.setColor(color) ;
+		printAction.setOrientation(orientation) ;
+		printAction.setSides(sides) ;
+		printAction.setDate(new Date()) ;
+		printAction.setFileSizeInKB(pdfMetaInfo.getFileSizeInKB()) ;
+		printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;
+		printAction.setHojasTotales(pdfMetaInfo.getHojasTotales()) ;
+		
+		// Almacenamos la instancia en BBDD
+		this.printActionRepository.saveAndFlush(printAction) ;
+		
+		return printAction ;
 	}
 	
 	

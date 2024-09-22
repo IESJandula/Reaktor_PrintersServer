@@ -122,10 +122,13 @@ public class Constants
 	public static final int ERR_USER_TRIED_TO_CANCEL_ANOTHER_USER_TASK = 113 ;
 	
 	/** Error - Usuario trató de cancelar una tarea que no existía el PDF en el sistema */
-	public static final int ERR_USER_TRIED_TO_CANCEL_WITHOUT_PDF_IN_SYSTEM = 113 ;
+	public static final int ERR_USER_TRIED_TO_CANCEL_WITHOUT_PDF_IN_SYSTEM = 114 ;
 	
 	/** Error - Propiedad constante no encontrada en el sistema */
-	public static final int ERR_CONSTANT_PROPERTY_NOT_FOUND = 114 ;
+	public static final int ERR_CONSTANT_PROPERTY_NOT_FOUND = 115 ;
+	
+	/** Error - Propiedad constante no encontrada en el sistema */
+	public static final int ERR_USER_TRIED_TO_PRINT_WITH_GLOBAL_ERROR = 116 ;
 	
 
 	/*********************************************************/
