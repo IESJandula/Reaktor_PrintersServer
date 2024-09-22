@@ -54,7 +54,7 @@ public class PrinterRestClient
 	 * @param listPrinters lista de impresoras actuales
 	 * @return ok si se guarda correctamente
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/client/printers", consumes = "application/json")
+	@RequestMapping(method = RequestMethod.POST, value = "/printers", consumes = "application/json")
 	public ResponseEntity<?> actualizarImpresorasActuales(@RequestHeader("Authorization") String authorizationHeader,
 														  @RequestBody(required = true) List<DtoPrinters> listPrinters)
 	{
@@ -115,7 +115,7 @@ public class PrinterRestClient
 	 * @param authorizationHeader token JWT de autorización
 	 * @return obtiene una tarea para imprimir
 	 */
-	@RequestMapping(method = RequestMethod.GET, value = "/client/print")
+	@RequestMapping(method = RequestMethod.GET, value = "/print")
 	public ResponseEntity<?> buscarTareaParaImprimir(@RequestHeader("Authorization") String authorizationHeader)
 	{
 		File carpetaFichero   = null ;
@@ -200,7 +200,7 @@ public class PrinterRestClient
 	 * @param message mensaje de respuesta
 	 * @return información del estado de la impresión
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/client/status")
+	@RequestMapping(method = RequestMethod.POST, value = "/status")
 	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader("Authorization") String authorizationHeader,
 															 @RequestHeader(name = "id") String id,
 														     @RequestHeader(name = "status") String status,
