@@ -640,9 +640,15 @@ public class PrinterRestWeb
         	
         	// Validamos la cancelación
         	this.cancelarImpresionValidacion(id, usuario, printAction) ;
+
+        	// Por defecto ponemos que la canceló el usuario
+        	printAction.setStatus(Constants.STATE_CANCELED_BY_USER) ;
         	
-        	// Cambiamos el valor a cancelar
-        	printAction.setStatus(Constants.STATE_CANCELED) ;
+        	// Si la canceló el administrador, cambiamos el valor del estado por cancelado por el TDE
+        	if (usuario.getRoles().contains(BaseServerConstants.ROLE_ADMINISTRADOR))
+    		{
+        		printAction.setStatus(Constants.STATE_CANCELED_BY_TDE) ;        		
+    		}
         	
         	// Actualizamos la BBDD
         	this.printActionRepository.saveAndFlush(printAction) ;
@@ -686,18 +692,22 @@ public class PrinterRestWeb
 			log.error(infoUsuario + errorString) ;
 			throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_CANCEL_NO_PENDING_TASK, errorString) ;
 		}
-		
-		// Obtenemos el nombre y apellidos del usuario
-		String nombreYapellidos = usuario.getNombre() + " " + usuario.getApellidos() ;
-		
-		// Si el usuario trató de cancelar una tarea que no era suya, devolver error
-		if (!printAction.getUser().equals(nombreYapellidos))
+
+		// Vemos si es un usuario normal
+		if (!usuario.getRoles().contains(BaseServerConstants.ROLE_ADMINISTRADOR))
 		{
-			String infoUsuario = "ID: " + id + ", usuario: " + usuario.getNombre() + " " + usuario.getApellidos() + ". " ;
-			String errorString = "Se intentó cancelar una tarea que no era suya" ;
+			// Obtenemos el nombre y apellidos del usuario
+			String nombreYapellidos = usuario.getNombre() + " " + usuario.getApellidos() ;
 			
-			log.error(infoUsuario + errorString) ;
-			throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_CANCEL_ANOTHER_USER_TASK, errorString) ;           		
+			// Si el usuario trató de cancelar una tarea que no era suya, devolver error
+			if (!printAction.getUser().equals(nombreYapellidos))
+			{
+				String infoUsuario = "ID: " + id + ", usuario: " + usuario.getNombre() + " " + usuario.getApellidos() + ". " ;
+				String errorString = "Se intentó cancelar una tarea que no era suya" ;
+				
+				log.error(infoUsuario + errorString) ;
+				throw new PrintersServerException(Constants.ERR_USER_TRIED_TO_CANCEL_ANOTHER_USER_TASK, errorString) ;           		
+			}
 		}
 	}
 	
