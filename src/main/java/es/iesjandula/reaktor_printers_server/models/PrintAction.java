@@ -1,8 +1,10 @@
 package es.iesjandula.reaktor_printers_server.models;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 
 import es.iesjandula.reaktor_printers_server.utils.Constants;
@@ -394,11 +396,18 @@ public class PrintAction
      */
     public HttpHeaders generaCabecera(File file)
     {
-        HttpHeaders headers = new HttpHeaders() ;
+    	HttpHeaders headers = new HttpHeaders() ;
 
         headers.set(Constants.HEADER_PRINT_ID, String.valueOf(this.id)) ;
         headers.set(Constants.HEADER_PRINT_USER, this.user) ;
-        headers.set(Constants.HEADER_PRINT_CONTENT_DISPOSITION, "attachment; filename=" + file.getName()) ;
+
+        // Utilizar ContentDisposition para manejar la cabecera correctamente
+        ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
+														          .filename(file.getName(), StandardCharsets.UTF_8)
+														          .build() ;
+        headers.setContentDisposition(contentDisposition) ;
+
+        // Resto de las cabeceras
         headers.set(Constants.HEADER_PRINT_PRINTER, this.printer) ;
         headers.set(Constants.HEADER_PRINT_COPIES, String.valueOf(this.copies)) ;
         headers.set(Constants.HEADER_PRINT_COLOR, this.color.equals(Constants.COLOR_BLACK_AND_WHITE) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
