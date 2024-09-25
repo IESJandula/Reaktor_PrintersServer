@@ -17,16 +17,16 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.iesjandula.base.base_server.firebase.AuthorizationService;
-import es.iesjandula.base.base_server.firebase.DtoUsuario;
+import es.iesjandula.base.base_server.security.models.DtoUsuario;
 import es.iesjandula.base.base_server.utils.BaseServerConstants;
 import es.iesjandula.base.base_server.utils.BaseServerException;
 import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
@@ -67,31 +67,22 @@ public class PrinterRestWeb
 	@Autowired
 	private IDiaFestivoRepository diaFestivoRepository ;
 	
-	@Autowired
-	private AuthorizationService authorizationService ;
-	
     @Autowired
     private IConstanteRepository constantesRepository ;
 
 	/**
 	 * Devuelve las impresoras guardadas en base de datos
-	 * @param authorizationHeader token JWT de autorización
+	 * 
 	 * @return la lista de impresoras
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/printers")
-	public ResponseEntity<?> obtenerImpresoras(@RequestHeader("Authorization") String authorizationHeader)
+	public ResponseEntity<?> obtenerImpresoras()
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-			
 			// Obtenemos la lista de impresoras
 			return ResponseEntity.ok().body(this.printerRepository.getPrinters()) ;
-		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
@@ -106,24 +97,17 @@ public class PrinterRestWeb
 	}
 	
 	/**
-	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de estados disponibles
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/states")
-	public ResponseEntity<?> obtenerEstados(@RequestHeader("Authorization") String authorizationHeader)
+	public ResponseEntity<?> obtenerEstados()
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-		
 			// Obtenemos la lista de estados
 			return ResponseEntity.ok().body(Constants.STATES_LIST) ;
 		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
-		}
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
@@ -137,24 +121,17 @@ public class PrinterRestWeb
 	}
 	
 	/**
-	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de orientaciones disponibles
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/orientations")
-	public ResponseEntity<?> obtenerOrientaciones(@RequestHeader("Authorization") String authorizationHeader)
+	public ResponseEntity<?> obtenerOrientaciones()
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-		
 			// Obtenemos la lista de orientaciones
 			return ResponseEntity.ok().body(Constants.ORIENTATIONS_LIST) ;
 		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
-		}
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
@@ -168,24 +145,17 @@ public class PrinterRestWeb
 	}
 	
 	/**
-	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de colores disponibles
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/colors")
-	public ResponseEntity<?> obtenerColores(@RequestHeader("Authorization") String authorizationHeader)
+	public ResponseEntity<?> obtenerColores()
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-		
 			// Obtenemos la lista de colores
 			return ResponseEntity.ok().body(Constants.COLORS_LIST) ;
 		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
-		}
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
@@ -199,23 +169,16 @@ public class PrinterRestWeb
 	}
 	
 	/**
-	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de caras disponibles
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/sides")
-	public ResponseEntity<?> obtenerCaras(@RequestHeader("Authorization") String authorizationHeader)
+	public ResponseEntity<?> obtenerCaras()
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-		
 			// Obtenemos la lista de colores
 			return ResponseEntity.ok().body(Constants.SIDES_LIST) ;
-		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
@@ -230,28 +193,21 @@ public class PrinterRestWeb
 	}
 	
 	/**
-	 * @param authorizationHeader token JWT de autorización
 	 * @return response Dto Global State
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/validations")
-	public ResponseEntity<?> validacionesGlobalesPreviasImpresion(@RequestHeader("Authorization") String authorizationHeader)
+	public ResponseEntity<?> validacionesGlobalesPreviasImpresion()
 	{
 		ResponseDtoGlobalState responseDtoGlobalState = new ResponseDtoGlobalState() ;
 		
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-
 			// Llamada al método interno para obtener error global si existiera
 			responseDtoGlobalState.setGlobalError(this.validacionesGlobalesPreviasImpresionInternal()) ;
 			
 			// Obtenemos las impresoras y sus estados
 			responseDtoGlobalState.setDtoPrinters(this.printerRepository.getPrinters()) ;
-		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
@@ -272,19 +228,16 @@ public class PrinterRestWeb
 
 	/**
 	 * Devuelve las impresiones filtradas por los parametros pasados como parametro, si no se envia ninguno manda todos
-	 * @param authorizationHeader token JWT de autorización
+	 * 
 	 * @param printerQuery parámetros de la query
 	 * @return lista de ResponseDtoPrintAction con aquellos encontrados
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/filter")
-	public ResponseEntity<?> buscarImpresiones(@RequestHeader("Authorization") String authorizationHeader,
-											   @RequestBody(required = true) RequestDtoPrintQuery printQuery) 
+	public ResponseEntity<?> buscarImpresiones(@RequestBody(required = true) RequestDtoPrintQuery printQuery) 
 	{
 	    try 
 	    {
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-	    	
 	    	// Convertimos las fechas string a date
 	        Date startDate = ConversorFechasHoras.convertirStringToDate(printQuery.getStartDate()) ;
 	        Date endDate   = ConversorFechasHoras.convertirStringToDate(printQuery.getEndDate()) ;
@@ -298,10 +251,6 @@ public class PrinterRestWeb
 	        // Devolvemos el resultado
 	        return ResponseEntity.ok().body(actions);
 	    }
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
-		}
 	    catch (Exception exception) 
 	    {
 	        PrintersServerException printersServerException = 
@@ -316,7 +265,7 @@ public class PrinterRestWeb
 	
 	/**
 	 * Guarda en base de datos la peticion de impresion realizada desde la web y guarda el documento en el servidor
-	 * @param authorizationHeader token JWT de autorización
+	 * 
 	 * @param printer impresora
 	 * @param numCopies número de copias
 	 * @param orientation horizontal o vertical
@@ -326,18 +275,15 @@ public class PrinterRestWeb
 	 * @param file fichero
 	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
 	 */
+    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
-	public ResponseEntity<?> imprimirPdf(@RequestHeader("Authorization") String authorizationHeader,
-										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
+	public ResponseEntity<?> imprimirPdf(@RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
 										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
 										 @RequestBody(required = true)  MultipartFile file)
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-			
 			// Llamada al método interno para realizar las validaciones
 			String errorGlobal = this.validacionesGlobalesPreviasImpresionInternal() ;
 			
@@ -373,10 +319,6 @@ public class PrinterRestWeb
 
 			log.error(errorString, printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
-		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (PrintersServerException printersServerException)
 		{
@@ -606,18 +548,22 @@ public class PrinterRestWeb
 	
 	
 	/**
-	 * @param authorizationHeader token JWT de autorización
 	 * @param id identificador de la impresión
 	 * @return 200 si todo fue bien y error en otro caso
 	 */
+	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/cancel")
-	public ResponseEntity<?> cancelarImpresion(@RequestHeader("Authorization") String authorizationHeader,
+	public ResponseEntity<?> cancelarImpresion(@AuthenticationPrincipal DtoUsuario usuario,
 											   @RequestParam(required = true) Long id)
 	{
 		try
 		{
-			// Primero autorizamos la petición y obtenemos la información del usuario
-			DtoUsuario usuario = this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
+			if (usuario == null)
+			{
+				log.error("Usuario no autenticado trató de cancelar la siguiente impresión: {}", id) ;
+				
+				throw new BaseServerException(BaseServerConstants.ERR_USER_NOT_AUTHENTICATED, BaseServerConstants.ERR_USER_NOT_AUTHENTICATED_MSG) ;
+		    }
 			
 			// Buscamos la tarea de impresión por id
 			Optional<PrintAction> optionalPrintAction = this.printActionRepository.findById(id) ;
@@ -791,26 +737,19 @@ public class PrinterRestWeb
 	}
 	
 	/**
-	 * @param authorizationHeader token JWT de autorización
 	 * @return la lista de constantes disponibles
 	 */
+	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/constantes")
-	public ResponseEntity<?> actualizarConstantes(@RequestHeader("Authorization") String authorizationHeader)
+	public ResponseEntity<?> actualizarConstantes()
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-			
 			// Obtenemos las constantes de BBDD
 			List<DtoConstante> dtoConstanteList = this.constantesRepository.findAllAsDto() ;
 			
 			// Devolvemos la lista de constantes
 			return ResponseEntity.ok().body(dtoConstanteList) ;
-		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
@@ -825,18 +764,15 @@ public class PrinterRestWeb
 	}
 	
 	/**
-	 * @param 
+	 * @param dtoConstanteList lista de constantes a actualizar
 	 * @return la lista de constantes disponibles
 	 */
+	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/constantes")
-	public ResponseEntity<?> actualizarConstantes(@RequestHeader("Authorization") String authorizationHeader,
-				  								  @RequestBody(required = true) List<DtoConstante> dtoConstanteList)
+	public ResponseEntity<?> actualizarConstantes(@RequestBody(required = true) List<DtoConstante> dtoConstanteList)
 	{
 		try
 		{
-			// Primero autorizamos la petición
-			this.authorizationService.autorizarPeticion(authorizationHeader, BaseServerConstants.ROLE_PROFESOR) ;
-			
 			// Iteramos y vamos actualizando los cambios
 			for (DtoConstante dtoConstante : dtoConstanteList)
 			{
@@ -849,10 +785,6 @@ public class PrinterRestWeb
 			
 			// Devolvemos 200
 			return ResponseEntity.ok().build() ;
-		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
 		}
 		catch (Exception exception)
 		{
