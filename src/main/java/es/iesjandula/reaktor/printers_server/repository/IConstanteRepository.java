@@ -23,7 +23,7 @@ public interface IConstanteRepository extends JpaRepository<Constante, String>
      */
 	Optional<Constante> findByClave(String clave) ;
 	
-	@Query("SELECT new es.iesjandula.reaktor_printers_server.dto.DtoConstante(c.clave, c.valor) "   +
+	@Query("SELECT new es.iesjandula.reaktor.printers_server.dto.DtoConstante(c.clave, c.valor) "   +
 		   "FROM Constante c")
 	List<DtoConstante> findAllAsDto() ;
 }
