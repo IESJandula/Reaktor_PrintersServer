@@ -26,9 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.iesjandula.base.base_server.security.models.DtoUsuario;
-import es.iesjandula.base.base_server.utils.BaseServerConstants;
-import es.iesjandula.base.base_server.utils.BaseServerException;
+import es.iesjandula.reaktor.base.security.models.DtoUsuario;
+import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
 import es.iesjandula.reaktor_printers_server.dto.DtoConstante;
 import es.iesjandula.reaktor_printers_server.dto.RequestDtoPrintQuery;
@@ -75,7 +74,7 @@ public class PrinterRestWeb
 	 * 
 	 * @return la lista de impresoras
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/printers")
 	public ResponseEntity<?> obtenerImpresoras()
 	{
@@ -87,11 +86,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
 											    exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -99,7 +98,7 @@ public class PrinterRestWeb
 	/**
 	 * @return la lista de estados disponibles
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/states")
 	public ResponseEntity<?> obtenerEstados()
 	{
@@ -111,11 +110,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
 											    exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -123,7 +122,7 @@ public class PrinterRestWeb
 	/**
 	 * @return la lista de orientaciones disponibles
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/orientations")
 	public ResponseEntity<?> obtenerOrientaciones()
 	{
@@ -135,11 +134,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
 											    exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -147,7 +146,7 @@ public class PrinterRestWeb
 	/**
 	 * @return la lista de colores disponibles
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/colors")
 	public ResponseEntity<?> obtenerColores()
 	{
@@ -159,11 +158,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
 											    exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -171,7 +170,7 @@ public class PrinterRestWeb
 	/**
 	 * @return la lista de caras disponibles
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/sides")
 	public ResponseEntity<?> obtenerCaras()
 	{
@@ -183,11 +182,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
 											    exception) ;
 	
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -195,7 +194,7 @@ public class PrinterRestWeb
 	/**
 	 * @return response Dto Global State
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/validations")
 	public ResponseEntity<?> validacionesGlobalesPreviasImpresion()
 	{
@@ -212,11 +211,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras",
 	        									exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerImpresoras", printersServerException) ;
 			
 			// Seteamos como error interno
 	    	responseDtoGlobalState.setGlobalError("Error interno. Impresión no permitida") ;
@@ -232,7 +231,7 @@ public class PrinterRestWeb
 	 * @param printerQuery parámetros de la query
 	 * @return lista de ResponseDtoPrintAction con aquellos encontrados
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/filter")
 	public ResponseEntity<?> buscarImpresiones(@RequestBody(required = true) RequestDtoPrintQuery printQuery) 
 	{
@@ -254,11 +253,11 @@ public class PrinterRestWeb
 	    catch (Exception exception) 
 	    {
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-        										BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+        										BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones",
 										 		exception) ;
 	        
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
@@ -275,7 +274,7 @@ public class PrinterRestWeb
 	 * @param file fichero
 	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
 	 */
-    @PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
 	public ResponseEntity<?> imprimirPdf(@RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
@@ -327,11 +326,11 @@ public class PrinterRestWeb
 	    catch (Exception exception) 
 	    {
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-        										BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+        										BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
 										 		exception) ;
 	        
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
@@ -551,7 +550,7 @@ public class PrinterRestWeb
 	 * @param id identificador de la impresión
 	 * @return 200 si todo fue bien y error en otro caso
 	 */
-	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/cancel")
 	public ResponseEntity<?> cancelarImpresion(@AuthenticationPrincipal DtoUsuario usuario,
 											   @RequestParam(required = true) Long id)
@@ -562,7 +561,7 @@ public class PrinterRestWeb
 			{
 				log.error("Usuario no autenticado trató de cancelar la siguiente impresión: {}", id) ;
 				
-				throw new BaseServerException(BaseServerConstants.ERR_USER_NOT_AUTHENTICATED, BaseServerConstants.ERR_USER_NOT_AUTHENTICATED_MSG) ;
+				throw new PrintersServerException(Constants.ERR_USER_NOT_AUTHENTICATED, Constants.ERR_USER_NOT_AUTHENTICATED_MSG) ;
 		    }
 			
 			// Buscamos la tarea de impresión por id
@@ -591,7 +590,7 @@ public class PrinterRestWeb
         	printAction.setStatus(Constants.STATE_CANCELED_BY_USER) ;
         	
         	// Si la canceló el administrador, cambiamos el valor del estado por cancelado por el TDE
-        	if (usuario.getRoles().contains(BaseServerConstants.ROLE_ADMINISTRADOR))
+        	if (usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
     		{
         		printAction.setStatus(Constants.STATE_CANCELED_BY_TDE) ;        		
     		}
@@ -601,10 +600,6 @@ public class PrinterRestWeb
             
             return ResponseEntity.ok().build() ;
 		}
-		catch (BaseServerException baseServerException)
-		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(baseServerException.getBodyExceptionMessage()) ;
-		}
 		catch (PrintersServerException printersServerException)
 		{
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(printersServerException.getBodyExceptionMessage()) ;
@@ -612,11 +607,11 @@ public class PrinterRestWeb
 	    catch (Exception exception) 
 	    {
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-        										BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+        										BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf",
 										 		exception) ;
 	        
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdf", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
@@ -640,7 +635,7 @@ public class PrinterRestWeb
 		}
 
 		// Vemos si es un usuario normal
-		if (!usuario.getRoles().contains(BaseServerConstants.ROLE_ADMINISTRADOR))
+		if (!usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR))
 		{
 			// Obtenemos el nombre y apellidos del usuario
 			String nombreYapellidos = usuario.getNombre() + " " + usuario.getApellidos() ;
@@ -739,7 +734,7 @@ public class PrinterRestWeb
 	/**
 	 * @return la lista de constantes disponibles
 	 */
-	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/constantes")
 	public ResponseEntity<?> actualizarConstantes()
 	{
@@ -754,11 +749,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes",
 											    exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -767,7 +762,7 @@ public class PrinterRestWeb
 	 * @param dtoConstanteList lista de constantes a actualizar
 	 * @return la lista de constantes disponibles
 	 */
-	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_PROFESOR + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/constantes")
 	public ResponseEntity<?> actualizarConstantes(@RequestBody(required = true) List<DtoConstante> dtoConstanteList)
 	{
@@ -789,11 +784,11 @@ public class PrinterRestWeb
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerConstantes",
 											    exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarConstantes", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarConstantes", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}

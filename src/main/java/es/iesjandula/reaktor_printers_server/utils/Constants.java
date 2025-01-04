@@ -215,5 +215,17 @@ public class Constants
 	
 	/** Constante - Parámetros YAML - Hojas impresión */
 	public static final String PARAM_YAML_MAXIMO_HOJAS_IMPRESION  = "reaktor.constantes.maximoHojasImpresion" ;
+	
+	
+	/*********************************************************/
+	/*********************** Errores *************************/
+	/*********************************************************/
+	
+	/** Error - Error usuario no autenticado */
+	public static final int ERR_USER_NOT_AUTHENTICATED 			= 4 ; 
+	
+	/** Error - Error usuario no autenticado - Mensaje */
+	public static final String ERR_USER_NOT_AUTHENTICATED_MSG   = "Usuario no autenticado" ;
+	
 }
 

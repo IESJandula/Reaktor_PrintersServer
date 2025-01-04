@@ -16,10 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
-import es.iesjandula.base.base_server.resources_handler.ResourcesHandler;
-import es.iesjandula.base.base_server.resources_handler.ResourcesHandlerFile;
-import es.iesjandula.base.base_server.resources_handler.ResourcesHandlerJar;
-import es.iesjandula.base.base_server.utils.BaseServerException;
+import es.iesjandula.reaktor.base.resources_handler.ResourcesHandler;
+import es.iesjandula.reaktor.base.resources_handler.ResourcesHandlerFile;
+import es.iesjandula.reaktor.base.resources_handler.ResourcesHandlerJar;
+import es.iesjandula.reaktor.base.utils.BaseException;
 import es.iesjandula.reaktor_printers_server.models.Constante;
 import es.iesjandula.reaktor_printers_server.models.DiaFestivo;
 import es.iesjandula.reaktor_printers_server.repository.IConstanteRepository;
@@ -71,7 +71,7 @@ public class InicializacionSistema
 	 * @throws BaseServerException con una excepción cargando las carpetas de resources
 	 */
 	@PostConstruct
-	public void inicializarSistema() throws PrintersServerException, BaseServerException
+	public void inicializarSistema() throws PrintersServerException, BaseException
 	{
 		// Esta es la carpeta con las subcarpetas y configuraciones
 	    ResourcesHandler printersServerConfig = this.getResourcesHandler(Constants.PRINTERS_SERVER_CONFIG);

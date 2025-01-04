@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.iesjandula.base.base_server.utils.BaseServerConstants;
+import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
 import es.iesjandula.reaktor_printers_server.dto.DtoPrinters;
 import es.iesjandula.reaktor_printers_server.models.PrintAction;
@@ -51,7 +51,7 @@ public class PrinterRestClient
 	 * @param listPrinters lista de impresoras actuales
 	 * @return ok si se guarda correctamente
 	 */
-	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_CLIENTE_IMPRESORA + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_CLIENTE_IMPRESORA + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/printers", consumes = "application/json")
 	public ResponseEntity<?> actualizarImpresorasActuales(@RequestBody(required = true) List<DtoPrinters> listPrinters)
 	{
@@ -95,11 +95,11 @@ public class PrinterRestClient
 	    catch (Exception exception) 
 	    {
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales",
 										 		exception) ;
 	        
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
@@ -109,7 +109,7 @@ public class PrinterRestClient
 	 * 
 	 * @return obtiene una tarea para imprimir
 	 */
-	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_CLIENTE_IMPRESORA + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_CLIENTE_IMPRESORA + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/print")
 	public ResponseEntity<?> buscarTareaParaImprimir()
 	{
@@ -167,11 +167,11 @@ public class PrinterRestClient
 	    catch (Exception exception)
 	    {
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir",
 	                                            exception) ;
 
-	        log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir", printersServerException) ;
+	        log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarTareaParaImprimir", printersServerException) ;
 	        return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	    finally
@@ -236,7 +236,7 @@ public class PrinterRestClient
 	 * @param message mensaje de respuesta
 	 * @return información del estado de la impresión
 	 */
-	@PreAuthorize("hasRole('" + BaseServerConstants.ROLE_CLIENTE_IMPRESORA + "')")
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_CLIENTE_IMPRESORA + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/status")
 	public ResponseEntity<?> asignarEstadoRespuestaImpresion(@RequestHeader(name = "id") String id,
 														     @RequestHeader(name = "status") String status,
@@ -284,11 +284,11 @@ public class PrinterRestClient
 		catch (Exception exception)
 		{
 	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseServerConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion",
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion",
 												exception) ;
 
-			log.error(BaseServerConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "asignarEstadoRespuestaImpresion", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
