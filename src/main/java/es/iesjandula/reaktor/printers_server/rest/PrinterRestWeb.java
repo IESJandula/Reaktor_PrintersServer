@@ -458,9 +458,7 @@ public class PrinterRestWeb
 	    int horaFinImpresionMinutos    = Integer.valueOf(horaFinImpresion[1]) ;
 	    
 	    // Verificamos si es fuera del horario permitido (antes de las 8 o después de las 20 de lunes a viernes)
-	    if (diaActual == DayOfWeek.SATURDAY ||
-	        diaActual == DayOfWeek.SUNDAY   || 
-	        horaActual.isBefore(LocalTime.of(horaInicioImpresionHora, horaInicioImpresionMinutos)) || 
+	    if (horaActual.isBefore(LocalTime.of(horaInicioImpresionHora, horaInicioImpresionMinutos)) || 
 	        horaActual.isAfter(LocalTime.of(horaFinImpresionHora, horaFinImpresionMinutos)))
 	    {
 
