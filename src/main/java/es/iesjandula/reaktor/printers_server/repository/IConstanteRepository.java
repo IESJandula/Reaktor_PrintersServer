@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor_printers_server.repository;
+package es.iesjandula.reaktor.printers_server.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import es.iesjandula.reaktor_printers_server.dto.DtoConstante;
-import es.iesjandula.reaktor_printers_server.models.Constante;
+import es.iesjandula.reaktor.printers_server.dto.DtoConstante;
+import es.iesjandula.reaktor.printers_server.models.Constante;
 
 /**
  * @author Francisco Manuel Benítez Chico

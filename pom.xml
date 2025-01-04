@@ -101,7 +101,7 @@
 						<configuration>
 							<classifier>jar-with-dependencies</classifier>
 							<mainClass>
-								es.iesjandula.reaktor_printers_server.ReaktorPrintersServerApplication</mainClass>
+								es.iesjandula.reaktor.printers_server.ReaktorPrintersServerApplication</mainClass>
 						</configuration>
 					</execution>
 				</executions>

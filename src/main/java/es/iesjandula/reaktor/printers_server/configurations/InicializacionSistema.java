@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor_printers_server.configurations;
+package es.iesjandula.reaktor.printers_server.configurations;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,13 +20,13 @@ import es.iesjandula.reaktor.base.resources_handler.ResourcesHandler;
 import es.iesjandula.reaktor.base.resources_handler.ResourcesHandlerFile;
 import es.iesjandula.reaktor.base.resources_handler.ResourcesHandlerJar;
 import es.iesjandula.reaktor.base.utils.BaseException;
-import es.iesjandula.reaktor_printers_server.models.Constante;
-import es.iesjandula.reaktor_printers_server.models.DiaFestivo;
-import es.iesjandula.reaktor_printers_server.repository.IConstanteRepository;
-import es.iesjandula.reaktor_printers_server.repository.IDiaFestivoRepository;
-import es.iesjandula.reaktor_printers_server.utils.Constants;
-import es.iesjandula.reaktor_printers_server.utils.ConversorFechasHoras;
-import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
+import es.iesjandula.reaktor.printers_server.models.Constante;
+import es.iesjandula.reaktor.printers_server.models.DiaFestivo;
+import es.iesjandula.reaktor.printers_server.repository.IConstanteRepository;
+import es.iesjandula.reaktor.printers_server.repository.IDiaFestivoRepository;
+import es.iesjandula.reaktor.printers_server.utils.Constants;
+import es.iesjandula.reaktor.printers_server.utils.ConversorFechasHoras;
+import es.iesjandula.reaktor.printers_server.utils.PrintersServerException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,4 +1,6 @@
-package es.iesjandula.reaktor_printers_server.models;
+package es.iesjandula.reaktor.printers_server.models;
+
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,19 +13,25 @@ import lombok.NoArgsConstructor;
 /**
  * @author Francisco Manuel Benítez Chico
  */
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
 @Entity
-@Table(name = "constantes")
-public class Constante
+@Table(name = "printer")
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class Printer
 {
-	/** Atributo clave de la constante */
 	@Id
-	private String clave ;
+	private String name ;
 	
-	/** Atributo valor de la constante */
 	@Column
-	private String valor ;
+	private int statusId ;
+	
+	@Column
+	private String status ;
+	
+	@Column
+	private int printingQueue ;
+	
+	@Column
+	private Date lastUpdate ;
 }
-

@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor_printers_server.dto;
+package es.iesjandula.reaktor.printers_server.dto;
 
 import java.util.List;
 

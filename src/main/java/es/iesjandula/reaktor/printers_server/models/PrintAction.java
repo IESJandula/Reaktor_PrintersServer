@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor_printers_server.models;
+package es.iesjandula.reaktor.printers_server.models;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -7,8 +7,8 @@ import java.util.Date;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 
-import es.iesjandula.reaktor_printers_server.utils.Constants;
-import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
+import es.iesjandula.reaktor.printers_server.utils.Constants;
+import es.iesjandula.reaktor.printers_server.utils.PrintersServerException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

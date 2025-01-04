@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor_printers_server.rest;
+package es.iesjandula.reaktor.printers_server.rest;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.utils.BaseConstants;
-import es.iesjandula.reaktor_printers_server.configurations.InicializacionSistema;
-import es.iesjandula.reaktor_printers_server.dto.DtoPrinters;
-import es.iesjandula.reaktor_printers_server.models.PrintAction;
-import es.iesjandula.reaktor_printers_server.models.Printer;
-import es.iesjandula.reaktor_printers_server.repository.IPrintActionRepository;
-import es.iesjandula.reaktor_printers_server.repository.IPrinterRepository;
-import es.iesjandula.reaktor_printers_server.utils.Constants;
-import es.iesjandula.reaktor_printers_server.utils.PrintersServerException;
+import es.iesjandula.reaktor.printers_server.configurations.InicializacionSistema;
+import es.iesjandula.reaktor.printers_server.dto.DtoPrinters;
+import es.iesjandula.reaktor.printers_server.models.PrintAction;
+import es.iesjandula.reaktor.printers_server.models.Printer;
+import es.iesjandula.reaktor.printers_server.repository.IPrintActionRepository;
+import es.iesjandula.reaktor.printers_server.repository.IPrinterRepository;
+import es.iesjandula.reaktor.printers_server.utils.Constants;
+import es.iesjandula.reaktor.printers_server.utils.PrintersServerException;
 import lombok.extern.slf4j.Slf4j;
 
 /**

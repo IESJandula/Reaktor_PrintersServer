@@ -1,4 +1,4 @@
-package es.iesjandula.reaktor_printers_server.configurations;
+package es.iesjandula.reaktor.printers_server.configurations;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
