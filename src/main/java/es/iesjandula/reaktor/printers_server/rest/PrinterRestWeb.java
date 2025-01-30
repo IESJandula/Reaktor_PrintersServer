@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import es.iesjandula.reaktor.base.security.models.DtoUsuario;
+import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.printers_server.configurations.InicializacionSistema;
 import es.iesjandula.reaktor.printers_server.dto.DtoConstante;
@@ -552,7 +552,7 @@ public class PrinterRestWeb
 	 */
 	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/cancel")
-	public ResponseEntity<?> cancelarImpresion(@AuthenticationPrincipal DtoUsuario usuario,
+	public ResponseEntity<?> cancelarImpresion(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 											   @RequestParam(required = true) Long id)
 	{
 		try
@@ -622,7 +622,7 @@ public class PrinterRestWeb
 	 * @param printAction tarea a cancelar
 	 * @throws PrintersServerException con un error
 	 */
-	private void cancelarImpresionValidacion(Long id, DtoUsuario usuario, PrintAction printAction) throws PrintersServerException
+	private void cancelarImpresionValidacion(Long id, DtoUsuarioExtended usuario, PrintAction printAction) throws PrintersServerException
 	{
 		// Si la tarea no está pendiente, no se puede cancelar
 		if (!printAction.getStatus().equals(Constants.STATE_TODO))
@@ -658,7 +658,7 @@ public class PrinterRestWeb
 	 * @param printAction tarea a cancelar
 	 * @throws PrintersServerException con un error
 	 */
-	private void borrarFicheroPdfYcarpetaDelSistema(Long id, DtoUsuario usuario, PrintAction printAction) throws PrintersServerException
+	private void borrarFicheroPdfYcarpetaDelSistema(Long id, DtoUsuarioExtended usuario, PrintAction printAction) throws PrintersServerException
 	{
     	File carpetaFichero = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ; 
         File ficheroAborrar = new File(carpetaFichero, printAction.getFileName()) ;
