@@ -2,13 +2,13 @@ package es.iesjandula.reaktor.printers_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * @author Francisco Manuel Benítez Chico
  */
 @SpringBootApplication
-@EntityScan(basePackages = {"es.iesjandula"})
+@ComponentScan(basePackages = {"es.iesjandula"})
 public class ReaktorPrintersServerApplication
 {
 	public static void main(String[] args)
