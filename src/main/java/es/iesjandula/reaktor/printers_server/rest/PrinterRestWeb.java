@@ -183,10 +183,34 @@ public class PrinterRestWeb
 		{
 	        PrintersServerException printersServerException = 
 	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerCaras",
 											    exception) ;
 	
-			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerCaras", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	}
+
+	/**
+	 * @return la lista de caras disponibles
+	 */
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
+	@RequestMapping(method = RequestMethod.GET, value = "/stapling")
+	public ResponseEntity<?> obtenerGrapados()
+	{
+		try
+		{
+			// Obtenemos la lista de colores
+			return ResponseEntity.ok().body(Constants.STAPLING_LIST) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerGrapados",
+											    exception) ;
+	
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerGrapados", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -278,8 +302,8 @@ public class PrinterRestWeb
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
 	public ResponseEntity<?> imprimirPdf(@RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
-										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
-										 @RequestBody(required = true)  MultipartFile file)
+										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String stapling,
+										 @RequestParam(required = true) String user,		@RequestBody(required = true)  MultipartFile file)
 	{
 		try
 		{
@@ -296,7 +320,7 @@ public class PrinterRestWeb
 			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(numCopies, sides, file) ;
 			
 			// Creamos y almacenamos la printAction en BBDD
-			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, user, pdfMetaInfo);
+			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, stapling, user, pdfMetaInfo);
 
 			// Creamos un directorio temporal donde guardar el fichero
 			File folder = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ;
@@ -343,32 +367,33 @@ public class PrinterRestWeb
 	{
 		// Vemos si está deshabilitada la impresion
 		String outcome = this.validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada() ;
+		return null;
 		
-		if (outcome == null)
-		{
-			// Vemos si estamos en un día especial
-		    boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() ;
+		// if (outcome == null)
+		// {
+		// 	// Vemos si estamos en un día especial
+		//     boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() ;
 		    
-		    if (!diaEspecialImpresion)
-		    {
-			    // Obtener la fecha y hora actual
-			    LocalDate fechaActual = LocalDate.now() ;
+		//     if (!diaEspecialImpresion)
+		//     {
+		// 	    // Obtener la fecha y hora actual
+		// 	    LocalDate fechaActual = LocalDate.now() ;
 		    	
-			    if (outcome == null)
-			    {
-				    // Vemos si se cumplen los horarios de impresión
-			    	outcome = this.validacionesGlobalesPreviasImpresionInternalHoraPermitida(fechaActual) ;
-			    }
+		// 	    if (outcome == null)
+		// 	    {
+		// 		    // Vemos si se cumplen los horarios de impresión
+		// 	    	outcome = this.validacionesGlobalesPreviasImpresionInternalHoraPermitida(fechaActual) ;
+		// 	    }
 	
-			    if (outcome == null)
-			    {
-			    	// Vemos si no estamos en día de fiesta
-			    	outcome = this.validacionesGlobalesPreviasImpresionInternalDiaFiesta(fechaActual) ;
-			    }
-		    }
-		}
+		// 	    if (outcome == null)
+		// 	    {
+		// 	    	// Vemos si no estamos en día de fiesta
+		// 	    	outcome = this.validacionesGlobalesPreviasImpresionInternalDiaFiesta(fechaActual) ;
+		// 	    }
+		//     }
+		// }
 	    
-	    return outcome ;
+	    // return outcome ;
 	}
 
 	/**
@@ -520,7 +545,7 @@ public class PrinterRestWeb
 	 * @throws PrintersServerException con un error
 	 */
 	private PrintAction imprimirPdfCrearYalmacenarPrintAction(String printer, Integer numCopies, String orientation, String color,
-															  String sides,   String user,       PdfMetaInfo pdfMetaInfo) 
+															  String sides,   String stapling,   String user,        PdfMetaInfo pdfMetaInfo) 
 						throws PrintersServerException
 	{
 		// Creamos el objeto printAction con la configuracion recibida
@@ -534,6 +559,7 @@ public class PrinterRestWeb
 		printAction.setColor(color) ;
 		printAction.setOrientation(orientation) ;
 		printAction.setSides(sides) ;
+		printAction.setStapling(stapling) ;
 		printAction.setDate(new Date()) ;
 		printAction.setFileSizeInKB(pdfMetaInfo.getFileSizeInKB()) ;
 		printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;
