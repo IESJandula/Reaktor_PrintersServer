@@ -271,6 +271,7 @@ public class PrinterRestWeb
 	 * @param color color o blanco y negro
 	 * @param sides una cara o doble cara
 	 * @param user usuario
+	 * @param selectedPages páginas seleccionadas para imprimir
 	 * @param file fichero
 	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
 	 */
@@ -280,6 +281,7 @@ public class PrinterRestWeb
 										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
 										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
+										 @RequestParam(required = false) String selectedPages,
 										 @RequestBody(required = true)  MultipartFile file)
 	{
 		try
@@ -297,7 +299,7 @@ public class PrinterRestWeb
 			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(numCopies, sides, file) ;
 			
 			// Creamos y almacenamos la printAction en BBDD
-			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, user, pdfMetaInfo);
+			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, user, selectedPages, pdfMetaInfo);
 
 			// Creamos un directorio temporal donde guardar el fichero
 			File folder = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ;
@@ -523,12 +525,14 @@ public class PrinterRestWeb
 	 * @param color color o blanco y negro
 	 * @param sides una cara o doble cara
 	 * @param user usuario
+	 * @param selectedPages páginas seleccionadas para imprimir
 	 * @param pdfMetaInfo PDF Meta information
 	 * @return la referencia a la nueva Print Action creada
 	 * @throws PrintersServerException con un error
 	 */
 	private PrintAction imprimirPdfCrearYalmacenarPrintAction(String printer, Integer numCopies, String orientation, String color,
-															  String sides,   String user,       PdfMetaInfo pdfMetaInfo) 
+															  String sides,   String user,       String selectedPages,
+															  PdfMetaInfo pdfMetaInfo) 
 						throws PrintersServerException
 	{
 		// Creamos el objeto printAction con la configuracion recibida
@@ -546,6 +550,7 @@ public class PrinterRestWeb
 		printAction.setFileSizeInKB(pdfMetaInfo.getFileSizeInKB()) ;
 		printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;
 		printAction.setHojasTotales(pdfMetaInfo.getHojasTotales()) ;
+		printAction.setSelectedPages(selectedPages);
 		
 		// Almacenamos la instancia en BBDD
 		this.printActionRepository.saveAndFlush(printAction) ;
