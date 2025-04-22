@@ -55,4 +55,7 @@ public class ResponseDtoPrintAction
     
     /** Atributo - Hojas totales */
     private Integer hojasTotales ;
+    
+    /** Atributo - Páginas seleccionadas */
+    private String selectedPages ;
 }
