@@ -183,10 +183,34 @@ public class PrinterRestWeb
 		{
 	        PrintersServerException printersServerException = 
 	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados",
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerCaras",
 											    exception) ;
 	
-			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerEstados", printersServerException) ;
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerCaras", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	}
+
+	/**
+	 * @return la lista de caras disponibles
+	 */
+    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
+	@RequestMapping(method = RequestMethod.GET, value = "/stapling")
+	public ResponseEntity<?> obtenerGrapados()
+	{
+		try
+		{
+			// Obtenemos la lista de colores
+			return ResponseEntity.ok().body(Constants.STAPLING_LIST) ;
+		}
+		catch (Exception exception)
+		{
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerGrapados",
+											    exception) ;
+	
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerGrapados", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
@@ -348,8 +372,8 @@ public class PrinterRestWeb
 		String outcome = this.validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada() ;
 		
 		if (outcome == null)
-		{
-			// Vemos si estamos en un día especial
+    {
+		    // Vemos si estamos en un día especial
 		    boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() ;
 		    
 		    if (!diaEspecialImpresion)
@@ -378,7 +402,7 @@ public class PrinterRestWeb
 		    }
 		}
 	    
-	    return outcome ;
+	   return outcome ;
 	}
 
 	/**
@@ -546,6 +570,7 @@ public class PrinterRestWeb
 		printAction.setColor(color) ;
 		printAction.setOrientation(orientation) ;
 		printAction.setSides(sides) ;
+		printAction.setStapling(stapling) ;
 		printAction.setDate(new Date()) ;
 		printAction.setFileSizeInKB(pdfMetaInfo.getFileSizeInKB()) ;
 		printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;
