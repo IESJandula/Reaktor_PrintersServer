@@ -220,14 +220,14 @@ public class PrinterRestWeb
 	 */
     @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.GET, value = "/validations")
-	public ResponseEntity<?> validacionesGlobalesPreviasImpresion()
+	public ResponseEntity<?> validacionesGlobalesPreviasImpresion(@AuthenticationPrincipal DtoUsuarioExtended usuario)
 	{
 		ResponseDtoGlobalState responseDtoGlobalState = new ResponseDtoGlobalState() ;
 		
 		try
 		{
 			// Llamada al método interno para obtener error global si existiera
-			responseDtoGlobalState.setGlobalError(this.validacionesGlobalesPreviasImpresionInternal()) ;
+			responseDtoGlobalState.setGlobalError(this.validacionesGlobalesPreviasImpresionInternal(usuario)) ;
 			
 			// Obtenemos las impresoras y sus estados
 			responseDtoGlobalState.setDtoPrinters(this.printerRepository.getPrinters()) ;
@@ -300,7 +300,8 @@ public class PrinterRestWeb
 	 */
     @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
 	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
-	public ResponseEntity<?> imprimirPdf(@RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
+	public ResponseEntity<?> imprimirPdf(@AuthenticationPrincipal DtoUsuarioExtended usuario,
+										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
 										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String stapling,
 										 @RequestParam(required = true) String user,		@RequestBody(required = true)  MultipartFile file)
@@ -308,7 +309,7 @@ public class PrinterRestWeb
 		try
 		{
 			// Llamada al método interno para realizar las validaciones
-			String errorGlobal = this.validacionesGlobalesPreviasImpresionInternal() ;
+			String errorGlobal = this.validacionesGlobalesPreviasImpresionInternal(usuario) ;
 			
 			if (errorGlobal != null)
 			{
@@ -363,37 +364,43 @@ public class PrinterRestWeb
 	 * @return error global si existiera
 	 * @throws PrintersServerException con un error
 	 */
-	private String validacionesGlobalesPreviasImpresionInternal() throws PrintersServerException
+	private String validacionesGlobalesPreviasImpresionInternal(DtoUsuarioExtended usuario) throws PrintersServerException
 	{
 		// Vemos si está deshabilitada la impresion
 		String outcome = this.validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada() ;
-		return null;
 		
-		// if (outcome == null)
-		// {
-		// 	// Vemos si estamos en un día especial
-		//     boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() ;
+		if (outcome == null)
+    {
+		    // Vemos si estamos en un día especial
+		    boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() ;
 		    
-		//     if (!diaEspecialImpresion)
-		//     {
-		// 	    // Obtener la fecha y hora actual
-		// 	    LocalDate fechaActual = LocalDate.now() ;
-		    	
-		// 	    if (outcome == null)
-		// 	    {
-		// 		    // Vemos si se cumplen los horarios de impresión
-		// 	    	outcome = this.validacionesGlobalesPreviasImpresionInternalHoraPermitida(fechaActual) ;
-		// 	    }
-	
-		// 	    if (outcome == null)
-		// 	    {
-		// 	    	// Vemos si no estamos en día de fiesta
-		// 	    	outcome = this.validacionesGlobalesPreviasImpresionInternalDiaFiesta(fechaActual) ;
-		// 	    }
-		//     }
-		// }
+		    if (!diaEspecialImpresion)
+		    {
+				// Vemos si el usuario tiene role DIRECCIÓN o ADMINISTRADOR
+				boolean esAdminODireccion = usuario.getRoles().contains(BaseConstants.ROLE_DIRECCION) ||
+											usuario.getRoles().contains(BaseConstants.ROLE_ADMINISTRADOR) ;
+				
+				if (!esAdminODireccion)
+				{
+					// Obtenemos la fecha y hora actual
+					LocalDate fechaActual = LocalDate.now() ;
+					
+					if (outcome == null)
+					{
+						// Vemos si se cumplen los horarios de impresión
+						outcome = this.validacionesGlobalesPreviasImpresionInternalHoraPermitida(fechaActual) ;
+					}
+		
+					if (outcome == null)
+					{
+						// Vemos si no estamos en día de fiesta
+						outcome = this.validacionesGlobalesPreviasImpresionInternalDiaFiesta(fechaActual) ;
+					}
+				}
+		    }
+		}
 	    
-	    // return outcome ;
+	   return outcome ;
 	}
 
 	/**
