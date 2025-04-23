@@ -67,20 +67,6 @@ public class Constants
 	/** Constante - Lista de caras */
 	public static final List<String> SIDES_LIST  = Arrays.asList(new String[] { SIDES_DOUBLE_SIDE, SIDES_ONE_SIDE } ) ;
 
-
-	/*********************************************************/
-	/*********************** Grapado *************************/
-	/*********************************************************/
-	
-	/** Constante - Grapado - Sí */
-	public static final String STAPLING_YES = "Grapar" ;
-
-	/** Constante - Grapado - Ninguno */
-	public static final String STAPLING_NO = "No grapar";
-	
-	/** Constante - Lista de caras */
-	public static final List<String> STAPLING_LIST  = Arrays.asList(new String[] { STAPLING_NO, STAPLING_YES } ) ;
-	
 	
 	/*********************************************************/
 	/*********************** Colores *************************/
@@ -148,10 +134,6 @@ public class Constants
 	/** Error - Propiedad constante no encontrada en el sistema */
 	public static final int ERR_USER_TRIED_TO_PRINT_WITH_GLOBAL_ERROR = 116 ;
 
-	/** Error - Tipo de grapado no valido - Código */
-	public static final int ERR_INVALID_STAPLING_CODE 		  	  = 117 ;
-	
-
 	/*********************************************************/
 	/****************** Ficheros y carpetas ******************/
 	/*********************************************************/
@@ -195,10 +177,6 @@ public class Constants
 	
 	/** Constante - Header - Páginas Seleccionadas */
 	public static final String HEADER_PRINT_SELECTED_PAGES = "selectedPages" ;
-
-	/** Constante - Header - Grapas */
-	public static final String HEADER_PRINT_STAPLING = "stapling" ;
-
 	
 	/*********************************************************/
 	/****************** Tabla Constantes *********************/
