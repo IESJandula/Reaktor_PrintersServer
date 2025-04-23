@@ -280,8 +280,9 @@ public class PrinterRestWeb
 	public ResponseEntity<?> imprimirPdf(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
-										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String stapling,
-										 @RequestParam(required = true) String user,		@RequestBody(required = true)  MultipartFile file)
+										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
+										 @RequestParam(required = false) String selectedPages,
+										 @RequestBody(required = true)  MultipartFile file)
 	{
 		try
 		{
@@ -298,7 +299,7 @@ public class PrinterRestWeb
 			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(numCopies, sides, file) ;
 			
 			// Creamos y almacenamos la printAction en BBDD
-			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, stapling, user, pdfMetaInfo);
+			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, user, selectedPages, pdfMetaInfo);
 
 			// Creamos un directorio temporal donde guardar el fichero
 			File folder = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ;
@@ -530,7 +531,8 @@ public class PrinterRestWeb
 	 * @throws PrintersServerException con un error
 	 */
 	private PrintAction imprimirPdfCrearYalmacenarPrintAction(String printer, Integer numCopies, String orientation, String color,
-															  String sides,   String stapling,   String user,        PdfMetaInfo pdfMetaInfo) 
+															  String sides,   String user,       String selectedPages,
+															  PdfMetaInfo pdfMetaInfo) 
 						throws PrintersServerException
 	{
 		// Creamos el objeto printAction con la configuracion recibida
@@ -549,7 +551,7 @@ public class PrinterRestWeb
 		printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;
 		printAction.setHojasTotales(pdfMetaInfo.getHojasTotales()) ;
 		printAction.setSelectedPages(selectedPages);
-		
+
 		// Almacenamos la instancia en BBDD
 		this.printActionRepository.saveAndFlush(printAction) ;
 		
