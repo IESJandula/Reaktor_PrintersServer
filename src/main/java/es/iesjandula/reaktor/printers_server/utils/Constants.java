@@ -66,7 +66,6 @@ public class Constants
 	
 	/** Constante - Lista de caras */
 	public static final List<String> SIDES_LIST  = Arrays.asList(new String[] { SIDES_DOUBLE_SIDE, SIDES_ONE_SIDE } ) ;
-
 	
 	/*********************************************************/
 	/*********************** Colores *************************/
