@@ -190,30 +190,6 @@ public class PrinterRestWeb
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 		}
 	}
-
-	/**
-	 * @return la lista de caras disponibles
-	 */
-    @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
-	@RequestMapping(method = RequestMethod.GET, value = "/stapling")
-	public ResponseEntity<?> obtenerGrapados()
-	{
-		try
-		{
-			// Obtenemos la lista de colores
-			return ResponseEntity.ok().body(Constants.STAPLING_LIST) ;
-		}
-		catch (Exception exception)
-		{
-	        PrintersServerException printersServerException = 
-	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
-	        									BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerGrapados",
-											    exception) ;
-	
-			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "obtenerGrapados", printersServerException) ;
-			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
-		}
-	}
 	
 	/**
 	 * @return response Dto Global State
@@ -303,8 +279,8 @@ public class PrinterRestWeb
 	public ResponseEntity<?> imprimirPdf(@AuthenticationPrincipal DtoUsuarioExtended usuario,
 										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
 										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
-										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String stapling,
-										 @RequestParam(required = true) String user,		@RequestBody(required = true)  MultipartFile file)
+										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,	
+										 @RequestBody(required = true)  MultipartFile file)
 	{
 		try
 		{
@@ -321,7 +297,7 @@ public class PrinterRestWeb
 			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(numCopies, sides, file) ;
 			
 			// Creamos y almacenamos la printAction en BBDD
-			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, stapling, user, pdfMetaInfo);
+			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, user, pdfMetaInfo);
 
 			// Creamos un directorio temporal donde guardar el fichero
 			File folder = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ;
@@ -552,8 +528,7 @@ public class PrinterRestWeb
 	 * @throws PrintersServerException con un error
 	 */
 	private PrintAction imprimirPdfCrearYalmacenarPrintAction(String printer, Integer numCopies, String orientation, String color,
-															  String sides,   String stapling,   String user,        PdfMetaInfo pdfMetaInfo) 
-						throws PrintersServerException
+															  String sides,   String user,        PdfMetaInfo pdfMetaInfo)  throws PrintersServerException
 	{
 		// Creamos el objeto printAction con la configuracion recibida
 		PrintAction printAction = new PrintAction() ;
@@ -566,7 +541,6 @@ public class PrinterRestWeb
 		printAction.setColor(color) ;
 		printAction.setOrientation(orientation) ;
 		printAction.setSides(sides) ;
-		printAction.setStapling(stapling) ;
 		printAction.setDate(new Date()) ;
 		printAction.setFileSizeInKB(pdfMetaInfo.getFileSizeInKB()) ;
 		printAction.setNumeroPaginasPdf(pdfMetaInfo.getNumeroPaginasPdf()) ;

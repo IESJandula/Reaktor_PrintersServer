@@ -60,10 +60,6 @@ public class PrintAction
     @Column
     private String sides ;
 
-    /** Atributo - Stapling */
-    @Column
-    private String stapling ;
-
     /** Atributo - Date */
     @Column
     private Date date ;
@@ -309,34 +305,6 @@ public class PrintAction
     }
 
     /**
-     * Obtiene el tipo de grapado
-     * 
-     * @return el grapado
-     */
-    public String getStapling()
-    {
-        return this.stapling ;
-    }
-
-    /**
-     * Establece el grapado de la impresión.
-     * 
-     * @param stapling el grapado
-     * @throws PrintersServerException si el grapado no es válido
-     */
-    public void setStapling(String stapling) throws PrintersServerException
-    {
-        if (!Constants.STAPLING_LIST.contains(stapling))
-        {
-            String errorMessage = "El tipo de grapado '" + stapling + "' no es válido." ;
-            
-            log.error(errorMessage) ;
-            throw new PrintersServerException(Constants.ERR_INVALID_STAPLING_CODE, errorMessage) ;
-        }
-        
-        this.stapling = stapling ;
-    }
-    /**
      * Obtiene la fecha de la acción de impresión.
      * 
      * @return la fecha de la impresión
@@ -445,7 +413,6 @@ public class PrintAction
         headers.set(Constants.HEADER_PRINT_COLOR, this.color.equals(Constants.COLOR_BLACK_AND_WHITE) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
         headers.set(Constants.HEADER_PRINT_ORIENTATION, this.orientation.equals(Constants.ORIENTATION_VERTICAL) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
         headers.set(Constants.HEADER_PRINT_SIDES, this.sides.equals(Constants.SIDES_DOUBLE_SIDE) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
-        headers.set(Constants.HEADER_PRINT_STAPLING, this.stapling.equals(Constants.STAPLING_YES) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
         
         return headers ;
     }
