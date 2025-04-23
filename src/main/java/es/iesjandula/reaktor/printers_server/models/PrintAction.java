@@ -79,6 +79,10 @@ public class PrintAction
     /** Atributo - Hojas totales */
     @Column
     private Integer hojasTotales ;
+    
+    /** Atributo - Selected Pages */
+    @Column
+    private String selectedPages ;
 
     /**
      * Default constructor
@@ -387,6 +391,22 @@ public class PrintAction
 	{
 		this.hojasTotales = hojasTotales;
 	}
+	
+	/**
+	 * @return the selectedPages
+	 */
+	public String getSelectedPages()
+	{
+		return this.selectedPages ;
+	}
+
+	/**
+	 * @param selectedPages the selectedPages to set
+	 */
+	public void setSelectedPages(String selectedPages)
+	{
+		this.selectedPages = selectedPages ;
+	}
 
 	/**
      * Genera los encabezados HTTP para la acción de impresión.
@@ -413,6 +433,11 @@ public class PrintAction
         headers.set(Constants.HEADER_PRINT_COLOR, this.color.equals(Constants.COLOR_BLACK_AND_WHITE) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
         headers.set(Constants.HEADER_PRINT_ORIENTATION, this.orientation.equals(Constants.ORIENTATION_VERTICAL) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
         headers.set(Constants.HEADER_PRINT_SIDES, this.sides.equals(Constants.SIDES_DOUBLE_SIDE) ? Boolean.TRUE.toString() : Boolean.FALSE.toString()) ;
+        
+        // Añadir las páginas seleccionadas si están definidas
+        if (this.selectedPages != null && !this.selectedPages.isEmpty()) {
+            headers.set(Constants.HEADER_PRINT_SELECTED_PAGES, this.selectedPages);
+        }
         
         return headers ;
     }

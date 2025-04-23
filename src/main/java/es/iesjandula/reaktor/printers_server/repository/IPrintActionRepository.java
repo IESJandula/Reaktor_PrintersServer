@@ -20,7 +20,7 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 	@Query("SELECT new es.iesjandula.reaktor.printers_server.dto.ResponseDtoPrintAction(p.id, p.user, p.printer, p.status, p.fileName, "   +
 			 																		   "p.copies, p.color, p.orientation, p.sides, " +
 			 																		   "p.date, p.errorMessage, p.fileSizeInKB, " 	 + 
-			 																		   "p.numeroPaginasPdf, p.hojasTotales) "   +
+			 																		   "p.numeroPaginasPdf, p.hojasTotales, p.selectedPages) "   +
 		   "FROM PrintAction p " +
 		   "WHERE " +
 				"(:user IS NULL OR p.user = :user) AND " 			+
