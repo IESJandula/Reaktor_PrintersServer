@@ -33,3 +33,4 @@ build/
 .vscode/
 
 files
+printers_server_config_exec/
