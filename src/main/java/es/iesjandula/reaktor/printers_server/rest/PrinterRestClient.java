@@ -3,6 +3,7 @@ package es.iesjandula.reaktor.printers_server.rest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.utils.BaseConstants;
+import es.iesjandula.reaktor.base.utils.FechasUtils;
+import es.iesjandula.reaktor.base_client.dtos.NotificationWebDto;
+import es.iesjandula.reaktor.base_client.requests.notificaciones.RequestNotificacionesEnviarWeb;
+import es.iesjandula.reaktor.base_client.utils.BaseClientConstants;
+import es.iesjandula.reaktor.base_client.utils.BaseClientException;
 import es.iesjandula.reaktor.printers_server.configurations.InicializacionSistema;
 import es.iesjandula.reaktor.printers_server.dto.DtoPrinters;
 import es.iesjandula.reaktor.printers_server.models.PrintAction;
@@ -45,6 +51,9 @@ public class PrinterRestClient
 	@Autowired
 	private IPrintActionRepository printActionRepository ;
 	
+	@Autowired
+	private RequestNotificacionesEnviarWeb requestNotificacionesEnviarWeb ;
+
 	/**
 	 * Endpoint que guarda las impresoras guardadas en base de datos
 	 * 
@@ -63,31 +72,17 @@ public class PrinterRestClient
                 // Buscamos la impresora por nombre (clave primaria)
                 Optional<Printer> optionalPrinter = this.printerRepository.findById(dtoPrinter.getName()) ;
 
-                Printer printer = null ;
-                
                 // Si existe la impresora ...
                 if (optionalPrinter.isPresent())
                 {
-                    // ... la actualizamos
-                    printer = optionalPrinter.get() ;
-                    
-                    printer.setStatusId(dtoPrinter.getStatusId()) ;
-                    printer.setStatus(dtoPrinter.getStatus()) ;
-                    printer.setPrintingQueue(dtoPrinter.getPrintingQueue()) ;
-                    printer.setLastUpdate(dtoPrinter.getLastUpdate()) ;
+					// Actualizamos la impresora actual ya existente
+					this.actualizarImpresorasActualesYaExistente(dtoPrinter, optionalPrinter.get()) ;
                 }
                 else
                 {
-                    // Si no existe, creamos una nueva impresora
-                	printer = new Printer(dtoPrinter.getName(),
-                						  dtoPrinter.getStatusId(),
-                						  dtoPrinter.getStatus(),
-                						  dtoPrinter.getPrintingQueue(),
-                						  dtoPrinter.getLastUpdate()) ;
+					// Introducimos los datos de la nueva impresora
+					this.actualizarImpresorasActualesNueva(dtoPrinter) ;
                 }
-                
-                // Actualizamos la base de datos
-                this.printerRepository.saveAndFlush(printer) ;
             }
 
             return ResponseEntity.ok().build();
@@ -102,6 +97,152 @@ public class PrinterRestClient
 			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "actualizarImpresorasActuales", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
+	}
+
+	/**
+	 * Actualiza las impresoras actuales ya existentes
+	 * 
+	 * @param dtoPrinter DTO de la impresora
+	 * @param printer Impresora actual ya existente
+	 */
+	private void actualizarImpresorasActualesYaExistente(DtoPrinters dtoPrinter, Printer printer)
+	{
+		// Si no coincide el estado de la impresora en BBDD con el nuevo recibido, es porque algo ha sucedido
+		if (printer.getStatusId() != dtoPrinter.getStatusId())
+		{
+			// Si pasamos de un estado sin error a otro con error, enviamos una notificación web
+			if (printer.getStatusId() == 0 && dtoPrinter.getStatusId() != 0)
+			{
+				// Enviamos una notificación web para informar de que la impresora no está disponible
+				Integer idNotificacion = this.enviarNotificacionWeb(dtoPrinter.getName()) ;
+
+				// Si la notificación web se envió correctamente, guardamos el identificador en la BBDD
+				if (idNotificacion != null)
+				{
+					// Guardamos el identificador de la notificación web en la BBDD
+					printer.setIdNotificacionWeb(idNotificacion) ;
+				}
+			}
+			// Si pasamos a un estado sin error, borramos la notificación web si existe
+			else if (printer.getIdNotificacionWeb() != null)
+			{
+				// Eliminamos la notificación web
+				this.eliminarNotificacionWeb(printer.getIdNotificacionWeb()) ;
+			}
+		}
+
+		// Actualizamos la impresora en BBDD
+		printer.setStatusId(dtoPrinter.getStatusId()) ;
+		printer.setStatus(dtoPrinter.getStatus()) ;
+		printer.setPrintingQueue(dtoPrinter.getPrintingQueue()) ;
+		printer.setLastUpdate(dtoPrinter.getLastUpdate()) ;
+
+		// Actualizamos la base de datos
+		this.printerRepository.saveAndFlush(printer) ;
+	}
+
+	/**
+	 * Actualiza la impresora en BBDD
+	 * 
+	 * @param dtoPrinter DTO de la impresora
+	 */
+	private void actualizarImpresorasActualesNueva(DtoPrinters dtoPrinter)
+	{
+		// Inicializamos el identificador de la notificación web
+		Integer idNotificacion = null;
+
+		// Si el estado de la impresora es diferente de cero, enviamos una notificación web
+		if (dtoPrinter.getStatusId() != 0)
+		{
+			// Enviamos una notificación web con el nombre de la impresora
+			idNotificacion = this.enviarNotificacionWeb(dtoPrinter.getName()) ;
+		}
+
+		// Creamos una nueva impresora
+		Printer printer = new Printer(dtoPrinter.getName(),
+									  dtoPrinter.getStatusId(),
+									  dtoPrinter.getStatus(),
+									  dtoPrinter.getPrintingQueue(),
+									  dtoPrinter.getLastUpdate(),
+									  idNotificacion) ;
+
+		// Actualizamos la base de datos
+		this.printerRepository.saveAndFlush(printer) ;
+	}
+
+	/**
+	 * Envia una notificación web con el nombre de la impresora
+	 * 
+	 * @param nombreImpresora nombre de la impresora
+	 * @return Integer identificador de la notificación web
+	 */
+	private Integer enviarNotificacionWeb(String nombreImpresora)
+	{
+		try
+		{
+			// Creamos el DTO de la notificación web
+			NotificationWebDto notificationWebDto = new NotificationWebDto();
+			
+			// Definimos el texto de la notificación web
+			final String textoNotificacion = "La impresora " + nombreImpresora + " no está disponible" ;
+
+			// Seteamos el texto de la notificación web
+			notificationWebDto.setTexto(textoNotificacion);
+
+			// Seteamos la fecha de inicio y fin de la notificación web
+	
+			// La fecha de inicio es justo ahora
+			LocalDateTime fechaInicio = LocalDateTime.now();
+
+			// Le pongo una fecha fin holgada para que se borre al día siguiente como muy tarde
+			LocalDateTime fechaFin    = fechaInicio.plusDays(1);
+
+			notificationWebDto.setFechaInicio(FechasUtils.convertirFecha(fechaInicio));
+			notificationWebDto.setHoraInicio(FechasUtils.convertirHora(fechaInicio));
+			notificationWebDto.setFechaFin(FechasUtils.convertirFecha(fechaFin));
+			notificationWebDto.setHoraFin(FechasUtils.convertirHora(fechaFin));
+
+			// Seteamos el receptor de la notificación web
+			notificationWebDto.setReceptor(BaseClientConstants.RECEPTOR_NOTIFICACION_CLAUSTRO);
+
+			// Seteamos el tipo de notificación web
+			notificationWebDto.setTipo(BaseClientConstants.TIPO_NOTIFICACION_SOLO_TEXTO);
+	
+			// Lo notificamos por web y devolvemos el identificador de la notificación web
+			Integer idNotificacion = this.requestNotificacionesEnviarWeb.enviarNotificacionWeb(notificationWebDto); 
+
+			// Logueamos
+			log.info("Notificación web enviada correctamente con identificador: " + idNotificacion) ;
+
+			// Devolvemos el identificador de la notificación web
+			return idNotificacion;
+		}
+		catch (BaseClientException baseClientException)
+		{
+			// El error ya ha sido logueado previamente
+			return null;
+		}
+	}
+
+	/**
+	 * Elimina una notificación web
+	 * 
+	 * @param idNotificacion identificador de la notificación web
+	 */
+	private void eliminarNotificacionWeb(Integer idNotificacion)
+	{
+		try
+		{
+			// Eliminamos la notificación web
+			this.requestNotificacionesEnviarWeb.eliminarNotificacionWeb(idNotificacion) ;
+
+			// Logueamos
+			log.info("Notificación web eliminada correctamente con identificador: " + idNotificacion) ;
+		}
+		catch (BaseClientException baseClientException)
+		{
+			// El error ya ha sido logueado previamente
+		}
 	}
 
 	/**
@@ -179,11 +320,16 @@ public class PrinterRestClient
 	    	// Si se cogió fichero para imprimir ...
 	    	if (ficheroAimprimir != null)
 	    	{
-	    		// ... lo borramos junto con la carpeta del id
-	    		
+	    		// ... lo borramos
 	    		ficheroAimprimir.delete() ;
-	    		carpetaFichero.delete() ;
 	    	}
+
+			// Si se cogió carpeta para borrar ...
+			if (carpetaFichero != null)
+			{
+				// ... lo borramos
+				carpetaFichero.delete() ;
+			}
 	    }
 	}
 

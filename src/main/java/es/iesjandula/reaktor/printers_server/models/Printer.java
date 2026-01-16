@@ -34,4 +34,7 @@ public class Printer
 	
 	@Column
 	private Date lastUpdate ;
+
+	@Column
+	private Integer idNotificacionWeb ;
 }
