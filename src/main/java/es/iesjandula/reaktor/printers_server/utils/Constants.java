@@ -133,6 +133,9 @@ public class Constants
 	
 	/** Error - Propiedad constante no encontrada en el sistema */
 	public static final int ERR_USER_TRIED_TO_PRINT_WITH_GLOBAL_ERROR = 116 ;
+
+	/** Error - No se encontró ninguna impresora operativa */
+	public static final int ERR_NO_OPERATIVE_PRINTER_FOUND = 117 ;
 	
 
 	/*********************************************************/

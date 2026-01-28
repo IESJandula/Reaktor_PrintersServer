@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.utils.BaseConstants;
+import es.iesjandula.reaktor.base.utils.BaseException;
 import es.iesjandula.reaktor.base.utils.FechasUtils;
 import es.iesjandula.reaktor.base_client.dtos.NotificationWebDto;
 import es.iesjandula.reaktor.base_client.requests.notificaciones.RequestNotificacionesEnviarWeb;
@@ -217,7 +218,7 @@ public class PrinterRestClient
 			// Devolvemos el identificador de la notificación web
 			return idNotificacion;
 		}
-		catch (BaseClientException baseClientException)
+		catch (BaseException | BaseClientException reaktorException)
 		{
 			// El error ya ha sido logueado previamente
 			return null;
@@ -239,7 +240,7 @@ public class PrinterRestClient
 			// Logueamos
 			log.info("Notificación web eliminada correctamente con identificador: " + idNotificacion) ;
 		}
-		catch (BaseClientException baseClientException)
+		catch (BaseException | BaseClientException reaktorException)
 		{
 			// El error ya ha sido logueado previamente
 		}

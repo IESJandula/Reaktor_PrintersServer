@@ -23,9 +23,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import es.iesjandula.reaktor.base.security.models.DtoAplicacion;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.printers_server.configurations.InicializacionSistema;
@@ -36,6 +38,7 @@ import es.iesjandula.reaktor.printers_server.dto.ResponseDtoPrintAction;
 import es.iesjandula.reaktor.printers_server.models.Constante;
 import es.iesjandula.reaktor.printers_server.models.DiaFestivo;
 import es.iesjandula.reaktor.printers_server.models.PrintAction;
+import es.iesjandula.reaktor.printers_server.models.Printer;
 import es.iesjandula.reaktor.printers_server.repository.IConstanteRepository;
 import es.iesjandula.reaktor.printers_server.repository.IDiaFestivoRepository;
 import es.iesjandula.reaktor.printers_server.repository.IPrintActionRepository;
@@ -276,13 +279,13 @@ public class PrinterRestWeb
 	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
 	 */
     @PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
-	@RequestMapping(method = RequestMethod.POST, value = "/print", consumes = "multipart/form-data")
-	public ResponseEntity<?> imprimirPdf(@AuthenticationPrincipal DtoUsuarioExtended usuario,
-										 @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
-										 @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
-										 @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
-										 @RequestParam(required = false) String selectedPages,
-										 @RequestBody(required = true)  MultipartFile file)
+	@RequestMapping(method = RequestMethod.POST, value = "/print/user", consumes = "multipart/form-data")
+	public ResponseEntity<?> imprimirPdfUser(@AuthenticationPrincipal DtoUsuarioExtended usuario,
+										     @RequestParam(required = true) String printer,     @RequestParam(required = true) Integer numCopies,
+										     @RequestParam(required = true) String orientation, @RequestParam(required = true) String color,
+										     @RequestParam(required = true) String sides, 		@RequestParam(required = true) String user,
+										     @RequestParam(required = false) String selectedPages,
+										     @RequestBody(required = true)  MultipartFile file)
 	{
 		try
 		{
@@ -296,7 +299,7 @@ public class PrinterRestWeb
 			}
 			
 			// Obtenemos los metadatos del fichero PDF
-			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(numCopies, sides, file) ;
+			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(sides, numCopies, file) ;
 			
 			// Creamos y almacenamos la printAction en BBDD
 			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printer, numCopies, orientation, color, sides, user, selectedPages, pdfMetaInfo);
@@ -337,7 +340,7 @@ public class PrinterRestWeb
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
-	
+
 	/**
 	 * @return error global si existiera
 	 * @throws PrintersServerException con un error
@@ -348,7 +351,7 @@ public class PrinterRestWeb
 		String outcome = this.validacionesGlobalesPreviasImpresionInternalImpresionDeshabilitada() ;
 		
 		if (outcome == null)
-    {
+    	{
 		    // Vemos si estamos en un día especial
 		    boolean diaEspecialImpresion = this.validacionesGlobalesPreviasImpresionInternalDiaEspecialImpresion() ;
 		    
@@ -518,8 +521,148 @@ public class PrinterRestWeb
 	}
 
 	/**
-	 * Creamos y almacenamos la print action en BBDD
+	 * Guarda en base de datos la peticion de impresion realizada desde la aplicación y guarda el documento en el servidor
+	 * 
 	 * @param printer impresora
+	 * @param numCopies número de copias
+	 * @param orientation horizontal o vertical
+	 * @param color color o blanco y negro
+	 * @param sides una cara o doble cara
+	 * @param user usuario
+	 * @param selectedPages páginas seleccionadas para imprimir
+	 * @param file fichero
+	 * @return ok si todos los parámetros eran correctos y no hubo error guardando en base de datos
+	 */
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
+	@RequestMapping(method = RequestMethod.POST, value = "/print/app", consumes = "multipart/form-data")
+	public ResponseEntity<?> imprimirPdfApp(@AuthenticationPrincipal DtoAplicacion aplicacion,
+		                                    @RequestPart(name = "file", required = true) MultipartFile file)
+	{
+		try
+		{
+			// Asignamos los valores por defecto a las variables
+            String sides      = Constants.SIDES_DOUBLE_SIDE ;
+            Integer numCopies = 1 ;
+
+			// Obtenemos los metadatos del fichero PDF
+			PdfMetaInfo pdfMetaInfo = this.obtenerInformacionFicheroPdf(sides, numCopies, file) ;
+
+			// Buscamos la impresora que esté operativa
+			Printer printer = this.buscarUnaImpresoraOperativa() ;
+
+            // Asignamos los valores por defecto a las variables
+            String printerName   = printer.getName() ;
+            String orientation   = Constants.ORIENTATION_VERTICAL ;
+            String color         = Constants.COLOR_BLACK_AND_WHITE ;
+            String user          = aplicacion.getNombre() ;
+            String selectedPages = "1" ;
+
+			// Creamos y almacenamos la printAction en BBDD
+			PrintAction printAction = this.imprimirPdfCrearYalmacenarPrintAction(printerName, numCopies, orientation, color, sides, user, selectedPages, pdfMetaInfo);
+
+			// Creamos un directorio temporal donde guardar el fichero
+			File folder = new File(this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId()) ;
+			folder.mkdirs() ;
+			
+			// Creamos la ruta del fichero
+			String filePath = this.inicializacionCarpetas.getCarpetaConImpresionesPendientes() + File.separator + printAction.getId() + File.separator + printAction.getFileName() ;
+			
+			// Guardamos el fichero en el servidor
+			Files.write(Paths.get(filePath), file.getBytes()) ;
+
+			return ResponseEntity.ok().build() ;			
+		}
+		catch (PrintersServerException printersServerException)
+		{
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+		catch (Exception exception)
+		{
+			PrintersServerException printersServerException = 
+				new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+											BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdfApp",
+											exception) ;
+
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "imprimirPdfApp", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	}
+
+	/**
+	 * @param sides una cara o doble cara
+	 * @param numCopies número de copias
+	 * @param multipartFile fichero PDF
+	 * @return PdfMetaInfo
+	 * @throws PrintersServerException con un error
+	 */
+	private PdfMetaInfo obtenerInformacionFicheroPdf(String sides, Integer numCopies, MultipartFile multipartFile) throws PrintersServerException
+	{
+		if (multipartFile.isEmpty())
+		{
+			String errorString = "El fichero " + multipartFile.getOriginalFilename() + " está vacío" ;
+            
+			log.error(errorString) ;
+			throw new PrintersServerException(Constants.ERR_IOEXCEPTION_GETTING_METAINFO_PDF, errorString) ;
+        }
+		
+		try
+		{
+			// Cargamos el PDF
+			PDDocument pdDocument = Loader.loadPDF(multipartFile.getBytes()) ;
+			
+			 // Obtenemos el tamaño del archivo en bytes y convertirlo a kilobytes
+            long fileSizeInKB 	  = multipartFile.getSize() / 1024 ;
+			
+			// Obtenemos el número de páginas
+			double numeroPaginasPdf  = pdDocument.getNumberOfPages() ;
+			
+			// Validamos si está a doble cara
+			boolean dobleCara 	  = Constants.SIDES_DOUBLE_SIDE.equals(sides) ;
+
+			// Calculamos el número de hojas totales
+			double hojasTotales 	  = numeroPaginasPdf ;
+			if (dobleCara)
+			{
+				hojasTotales = Math.ceil(numeroPaginasPdf / 2) ;
+			}
+			
+			// Las hojas totales las multiplicamos por el número de copias
+			hojasTotales = hojasTotales * numCopies ;
+			
+			// Guardo todo en un objeto que contenga esta información
+			return new PdfMetaInfo(multipartFile.getOriginalFilename(), fileSizeInKB, (int) numeroPaginasPdf, (int) hojasTotales) ;
+		}
+		catch (IOException ioException)
+		{
+			String errorString = "IOException mientras se leía la metainformación del fichero PDF: " + multipartFile.getOriginalFilename() ;
+			
+			log.error(errorString, ioException) ;
+			throw new PrintersServerException(Constants.ERR_IOEXCEPTION_GETTING_METAINFO_PDF, errorString, ioException) ;
+		}
+	}
+
+	/**
+	 * @return la impresora operativa
+	 * @throws PrintersServerException con un error
+	 */
+	private Printer buscarUnaImpresoraOperativa() throws PrintersServerException
+	{
+		Optional<Printer> optionalPrinter = this.printerRepository.findFirstByStatusId(0);
+
+		if (optionalPrinter.isEmpty())
+		{
+			String errorString = "No se encontró ninguna impresora operativa" ;
+
+			log.error(errorString) ;
+			throw new PrintersServerException(Constants.ERR_NO_OPERATIVE_PRINTER_FOUND, errorString) ;
+		}
+
+		return optionalPrinter.get() ;
+	}
+
+	/**
+	 * Creamos y almacenamos la print action en BBDD
+	 * @param printerName nombre de la impresora
 	 * @param numCopies número de copias
 	 * @param orientation horizontal o vertical
 	 * @param color color o blanco y negro
@@ -530,16 +673,15 @@ public class PrinterRestWeb
 	 * @return la referencia a la nueva Print Action creada
 	 * @throws PrintersServerException con un error
 	 */
-	private PrintAction imprimirPdfCrearYalmacenarPrintAction(String printer, Integer numCopies, String orientation, String color,
+	private PrintAction imprimirPdfCrearYalmacenarPrintAction(String printerName, Integer numCopies, String orientation, String color,
 															  String sides,   String user,       String selectedPages,
-															  PdfMetaInfo pdfMetaInfo) 
-						throws PrintersServerException
+		                                                      PdfMetaInfo pdfMetaInfo)  throws PrintersServerException
 	{
 		// Creamos el objeto printAction con la configuracion recibida
 		PrintAction printAction = new PrintAction() ;
-		
+
 		printAction.setUser(user) ;
-		printAction.setPrinter(printer) ;
+		printAction.setPrinter(printerName) ;
 		printAction.setStatus(Constants.STATE_TODO) ;
 		printAction.setFileName(pdfMetaInfo.getOriginalFilename()) ;
 		printAction.setCopies(numCopies) ;
@@ -554,11 +696,10 @@ public class PrinterRestWeb
 
 		// Almacenamos la instancia en BBDD
 		this.printActionRepository.saveAndFlush(printAction) ;
-		
+
 		return printAction ;
 	}
-	
-	
+
 	/**
 	 * @param id identificador de la impresión
 	 * @return 200 si todo fue bien y error en otro caso
@@ -689,59 +830,6 @@ public class PrinterRestWeb
         // Borramos primero el fichero y después el directorio
         ficheroAborrar.delete() ;
         carpetaFichero.delete() ;
-	}
-	
-	/**
-	 * @param numCopies número de copias
-	 * @param sides a una cara o doble cara
-	 * @param multipartFile fichero PDF
-	 * @return PdfMetaInfo
-	 * @throws PrintersServerException con un error
-	 */
-	private PdfMetaInfo obtenerInformacionFicheroPdf(Integer numCopies, String sides, MultipartFile multipartFile) throws PrintersServerException
-	{
-		if (multipartFile.isEmpty())
-		{
-			String errorString = "El fichero " + multipartFile.getOriginalFilename() + " está vacío" ;
-            
-			log.error(errorString) ;
-			throw new PrintersServerException(Constants.ERR_IOEXCEPTION_GETTING_METAINFO_PDF, errorString) ;
-        }
-		
-		try
-		{
-			// Cargamos el PDF
-			PDDocument pdDocument = Loader.loadPDF(multipartFile.getBytes()) ;
-			
-			 // Obtenemos el tamaño del archivo en bytes y convertirlo a kilobytes
-            long fileSizeInKB 	  = multipartFile.getSize() / 1024 ;
-			
-			// Obtenemos el número de páginas
-			double numeroPaginasPdf  = pdDocument.getNumberOfPages() ;
-			
-			// Validamos si está a doble cara
-			boolean dobleCara 	  = Constants.SIDES_DOUBLE_SIDE.equals(sides) ;
-
-			// Calculamos el número de hojas totales
-			double hojasTotales 	  = numeroPaginasPdf ;
-			if (dobleCara)
-			{
-				hojasTotales = Math.ceil(numeroPaginasPdf / 2) ;
-			}
-			
-			// Las hojas totales las multiplicamos por el número de copias
-			hojasTotales = hojasTotales * numCopies ;
-			
-			// Guardo todo en un objeto que contenga esta información
-			return new PdfMetaInfo(multipartFile.getOriginalFilename(), fileSizeInKB, (int) numeroPaginasPdf, (int) hojasTotales) ;
-		}
-		catch (IOException ioException)
-		{
-			String errorString = "IOException mientras se leía la metainformación del fichero PDF: " + multipartFile.getOriginalFilename() ;
-			
-			log.error(errorString, ioException) ;
-			throw new PrintersServerException(Constants.ERR_IOEXCEPTION_GETTING_METAINFO_PDF, errorString, ioException) ;
-		}
 	}
 	
 	/**
