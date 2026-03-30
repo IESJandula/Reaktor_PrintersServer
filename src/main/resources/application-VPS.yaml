@@ -1,5 +1,14 @@
 spring:
-  jpa.hibernate.ddl-auto: update
+  application:
+    name: reaktor-printerserver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
   datasource:
     url: jdbc:mysql://localhost:3306/reaktor_printersserver
     username: root
@@ -37,3 +46,6 @@ reaktor:
     horaFinImpresion: "20:30"
     diaEspecialImpresion: "false"
     maximoHojasImpresion: "50"
+  audit:
+    exchange: audit.exchange
+    routing-key: audit.key
