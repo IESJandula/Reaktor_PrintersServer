@@ -82,4 +82,15 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 	@Query("SELECT p.status, COUNT(p) FROM PrintAction p " +
 		   "GROUP BY p.status")
 	List<Object[]> contarPorEstado() ;
+	
+	/**
+	 * Obtiene la fecha de la última impresión realizada por cada impresora.
+	 * Solo se contabilizan las impresiones con estado "Realizado".
+	 * 
+	 * @return Lista de Object[] con [printer, MAX(date)]
+	 */
+	@Query("SELECT p.printer, MAX(p.date) FROM PrintAction p " +
+		   "WHERE p.status = 'Realizado' " +
+		   "GROUP BY p.printer")
+	List<Object[]> obtenerUltimaImpresionPorImpresora() ;
 }
