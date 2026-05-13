@@ -15,6 +15,8 @@ import java.util.Optional;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -261,6 +263,53 @@ public class PrinterRestWeb
 										 		exception) ;
 	        
 			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresiones", printersServerException) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+	    }
+	}
+
+	/**
+	 * Devuelve las impresiones paginadas filtradas por los parametros pasados como parametro
+	 * 
+	 * @param printerQuery parámetros de la query
+	 * @param pageable parámetros de paginación (page, size, sort)
+	 * @return Page<ResponseDtoPrintAction> con las impresiones paginadas
+	 */
+	@PreAuthorize("hasRole('" + BaseConstants.ROLE_PROFESOR + "')")
+	@RequestMapping(method = RequestMethod.POST, value = "/filter/paginated")
+	public ResponseEntity<?> buscarImpresionesPaginadas(@RequestBody(required = true) RequestDtoPrintQuery printQuery, Pageable pageable) 
+	{
+	    try 
+	    {
+	    	// Convertimos las fechas string a date
+	        Date startDate = ConversorFechasHoras.convertirStringToDate(printQuery.getStartDate()) ;
+	        Date endDate   = ConversorFechasHoras.convertirStringToDate(printQuery.getEndDate()) ;
+
+	        // Llamada a la query personalizada paginada
+	        Page<ResponseDtoPrintAction> paginaImpresiones = this.printActionRepository.findPrintActionsPaginated(printQuery.getUser(),
+	        																									 printQuery.getPrinter(),
+	        																									 printQuery.getStatus(),
+	        																									 startDate,
+	        																									 endDate,
+	        																									 pageable) ;
+
+	        // Loguear información de paginación para debugging
+	        log.info("Impresiones recuperadas - Página: {}/{}, Total: {}, Elementos: {}", 
+	        		 paginaImpresiones.getNumber() + 1,
+	        		 paginaImpresiones.getTotalPages(), 
+	        		 paginaImpresiones.getTotalElements(), 
+	        		 paginaImpresiones.getNumberOfElements()) ;
+
+	        // Devolvemos el resultado paginado
+	        return ResponseEntity.ok().body(paginaImpresiones) ;
+	    }
+	    catch (Exception exception) 
+	    {
+	        PrintersServerException printersServerException = 
+	        		new PrintersServerException(BaseConstants.ERR_GENERIC_EXCEPTION_CODE, 
+        										BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresionesPaginadas",
+										 		exception) ;
+	        
+			log.error(BaseConstants.ERR_GENERIC_EXCEPTION_MSG + "buscarImpresionesPaginadas", printersServerException) ;
 			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
 	    }
 	}
