@@ -73,4 +73,13 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 		   "WHERE p.status = 'Realizado' AND p.hojasTotales IS NOT NULL " +
 		   "GROUP BY p.color")
 	List<Object[]> contarHojasPorColor() ;
+	
+	/**
+	 * Cuenta el número de impresiones agrupadas por estado.
+	 * 
+	 * @return Lista de Object[] con [estado, COUNT(*)]
+	 */
+	@Query("SELECT p.status, COUNT(p) FROM PrintAction p " +
+		   "GROUP BY p.status")
+	List<Object[]> contarPorEstado() ;
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.printers_server.dto.EstadisticaColorImpresionDto;
+import es.iesjandula.reaktor.printers_server.dto.EstadisticaEstadoImpresionDto;
 import es.iesjandula.reaktor.printers_server.repository.IPrintActionRepository;
 import es.iesjandula.reaktor.printers_server.utils.Constants;
 import es.iesjandula.reaktor.printers_server.utils.PrintersServerException;
@@ -79,6 +80,58 @@ public class EstadisticasController
 		}
 	}
 
+	@PreAuthorize("hasAnyRole('" + BaseConstants.ROLE_ADMINISTRADOR + "', '" + BaseConstants.ROLE_DIRECCION + "')")
+	@RequestMapping(method = RequestMethod.GET, value = "/estado-impresion")
+	public ResponseEntity<?> obtenerImpresionesPorEstado()
+	{
+		try
+		{
+			// Mapa para acumular totales (clave = estado y valor = total de impresiones)
+			Map<String, Long> mapaTotales = new HashMap<>() ;
+
+			// Obtenemos las impresiones agrupadas por estado desde el repositorio
+			List<Object[]> impresionesPorEstado = this.printActionRepository.contarPorEstado() ;
+
+			for (Object[] fila : impresionesPorEstado)
+			{
+				String estado = (String) fila[0] ;
+				Long totalImpresiones = ((Number) fila[1]).longValue() ;
+
+				// Acumulamos los datos en el mapa.
+				Long totalActual = mapaTotales.get(estado) ;
+				if (totalActual == null)
+				{
+					mapaTotales.put(estado, totalImpresiones) ;
+				}
+				else
+				{
+					mapaTotales.put(estado, totalActual + totalImpresiones) ;
+				}
+			}
+
+			// Convertimos el mapa a una lista de DTOs
+			List<EstadisticaEstadoImpresionDto> listaResultados = new ArrayList<>() ;
+			for (String estado : mapaTotales.keySet())
+			{
+				Long total = mapaTotales.get(estado) ;
+				listaResultados.add(new EstadisticaEstadoImpresionDto(estado, total)) ;
+			}
+
+			// Ordenamos la lista de mayor a menor usando el algoritmo burbuja
+			this.ordenarResultadosEstado(listaResultados) ;
+
+			return ResponseEntity.ok(listaResultados) ;
+		}
+		// Si ocurre un error lo capturamos, lo registramos en el log y devolvemos un error con un mensaje JSON.
+		catch (Exception exception)
+		{
+			String mensajeError = "Error inesperado al obtener las estadísticas de estado de impresión" ;
+			log.error(mensajeError, exception) ;
+			PrintersServerException printersServerException = new PrintersServerException(Constants.ERR_ESTADISTICAS, mensajeError, exception) ;
+			return ResponseEntity.status(500).body(printersServerException.getBodyExceptionMessage()) ;
+		}
+	}
+
 	// Método para ordenar la cantidad de hojas por color.
 
 	private void ordenarResultadosColor(List<EstadisticaColorImpresionDto> lista)
@@ -91,6 +144,26 @@ public class EstadisticasController
 				EstadisticaColorImpresionDto actual = lista.get(j) ;
 				EstadisticaColorImpresionDto siguiente = lista.get(j + 1) ;
 				if (actual.getTotalHojas() < siguiente.getTotalHojas())
+				{
+					lista.set(j, siguiente) ;
+					lista.set(j + 1, actual) ;
+				}
+			}
+		}
+	}
+
+	// Método para ordenar la cantidad de impresiones por estado.
+
+	private void ordenarResultadosEstado(List<EstadisticaEstadoImpresionDto> lista)
+	{
+		int tamano = lista.size() ;
+		for (int i = 0 ; i < tamano - 1 ; i++)
+		{
+			for (int j = 0 ; j < tamano - i - 1 ; j++)
+			{
+				EstadisticaEstadoImpresionDto actual = lista.get(j) ;
+				EstadisticaEstadoImpresionDto siguiente = lista.get(j + 1) ;
+				if (actual.getTotalImpresiones() < siguiente.getTotalImpresiones())
 				{
 					lista.set(j, siguiente) ;
 					lista.set(j + 1, actual) ;
