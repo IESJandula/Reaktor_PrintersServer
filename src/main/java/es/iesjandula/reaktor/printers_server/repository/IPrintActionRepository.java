@@ -62,4 +62,15 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 														   @Param("startDate") Date startDate,
 														   @Param("endDate") Date endDate,
 														   Pageable pageable) ;
+	
+	/**
+	 * Cuenta las hojas totales impresas agrupadas por color.
+	 * Solo se contabilizan las impresiones que se han realizado correctamente (estado "Realizado").
+	 * 
+	 * @return Lista de Object[] con [color, SUM(hojasTotales)]
+	 */
+	@Query("SELECT p.color, SUM(p.hojasTotales) FROM PrintAction p " +
+		   "WHERE p.status = 'Realizado' AND p.hojasTotales IS NOT NULL " +
+		   "GROUP BY p.color")
+	List<Object[]> contarHojasPorColor() ;
 }
