@@ -233,5 +233,13 @@ public class Constants
 	/** Error - Error usuario no autenticado - Mensaje */
 	public static final String ERR_USER_NOT_AUTHENTICATED_MSG   = "Usuario no autenticado" ;
 	
+	
+	/*********************************************************/
+	/****************** Errores Estadísticas *****************/
+	/*********************************************************/
+	
+	/** Error - Estadísticas */
+	public static final int ERR_ESTADISTICAS = 118 ;
+	
 }
 
