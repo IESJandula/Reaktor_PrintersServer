@@ -35,10 +35,12 @@ public class PrinterScheduler
 	private static final SimpleDateFormat FORMATO_FECHA = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss") ;
 
 	/**
-	 * Se ejecuta cada 5 minutos para calcular cuándo fue la última impresión realizada
-	 * en cada impresora.
+	 * Se ejecuta cada 5 minutos entre las 7:45 y las 20:30 de los días laborables 
+	 * para calcular cuándo fue la última impresión realizada en cada impresora.
 	 */
-	@Scheduled(cron = "0 */5 * * * *")
+	@Scheduled(cron = "0 45-59/5 7 * * MON-FRI")
+	@Scheduled(cron = "0 */5 8-19 * * MON-FRI")
+	@Scheduled(cron = "0 0-30/5 20 * * MON-FRI")
 	public void calcularUltimaImpresionPorImpresora()
 	{
 		log.info("Iniciando scheduler de cálculo de última impresión por impresora...") ;
