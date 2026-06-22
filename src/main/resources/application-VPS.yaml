@@ -3,7 +3,7 @@ spring:
     name: printers
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
   rabbitmq:
     host: localhost
     port: 5672
