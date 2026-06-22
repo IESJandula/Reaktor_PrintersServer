@@ -70,7 +70,7 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 	 * @return Lista de Object[] con [color, SUM(hojasTotales)]
 	 */
 	@Query("SELECT p.color, SUM(p.hojasTotales) FROM PrintAction p " +
-		   "WHERE p.status = 'Realizado' AND p.hojasTotales IS NOT NULL AND p.cursoAcademico = :cursoAcademico" +
+		   "WHERE p.status = 'Realizado' AND p.hojasTotales IS NOT NULL AND p.cursoAcademico = :cursoAcademico " +
 		   "GROUP BY p.color")
 	List<Object[]> contarHojasPorColor(String cursoAcademico) ;
 	
@@ -80,7 +80,7 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 	 * @return Lista de Object[] con [estado, COUNT(*)]
 	 */
 	@Query("SELECT p.status, COUNT(p) FROM PrintAction p " +
-		   "WHERE p.cursoAcademico = :cursoAcademico" +
+		   "WHERE p.cursoAcademico = :cursoAcademico " +
 		   "GROUP BY p.status")
 	List<Object[]> contarPorEstado(String cursoAcademico) ;
 	
