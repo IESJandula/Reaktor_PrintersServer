@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.iesjandula.reaktor.base.utils.BaseConstants;
+import es.iesjandula.reaktor.base.utils.FechasUtils;
 import es.iesjandula.reaktor.printers_server.dto.EstadisticaColorImpresionDto;
 import es.iesjandula.reaktor.printers_server.dto.EstadisticaEstadoImpresionDto;
 import es.iesjandula.reaktor.printers_server.repository.IPrintActionRepository;
@@ -37,8 +38,11 @@ public class EstadisticasController
 			// Mapa para acumular totales (clave = tipo de color y valor = total de hojas impresas)
 			Map<String, Long> mapaTotales = new HashMap<>() ;
 
+			// Obtenemos el curso académico actual
+			String cursoAcademico = FechasUtils.obtenerCursoAcademicoActual() ;
+
 			// Obtenemos las hojas agrupadas por color desde el repositorio
-			List<Object[]> hojasPorColor = this.printActionRepository.contarHojasPorColor() ;
+			List<Object[]> hojasPorColor = this.printActionRepository.contarHojasPorColor(cursoAcademico) ;
 
 			for (Object[] fila : hojasPorColor)
 			{
@@ -85,12 +89,15 @@ public class EstadisticasController
 	public ResponseEntity<?> obtenerImpresionesPorEstado()
 	{
 		try
-		{
+		{			
 			// Mapa para acumular totales (clave = estado y valor = total de impresiones)
 			Map<String, Long> mapaTotales = new HashMap<>() ;
+		
+			// Obtenemos el curso académico actual
+			String cursoAcademico = FechasUtils.obtenerCursoAcademicoActual() ;
 
 			// Obtenemos las impresiones agrupadas por estado desde el repositorio
-			List<Object[]> impresionesPorEstado = this.printActionRepository.contarPorEstado() ;
+			List<Object[]> impresionesPorEstado = this.printActionRepository.contarPorEstado(cursoAcademico) ;
 
 			for (Object[] fila : impresionesPorEstado)
 			{

@@ -70,9 +70,9 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 	 * @return Lista de Object[] con [color, SUM(hojasTotales)]
 	 */
 	@Query("SELECT p.color, SUM(p.hojasTotales) FROM PrintAction p " +
-		   "WHERE p.status = 'Realizado' AND p.hojasTotales IS NOT NULL " +
+		   "WHERE p.status = 'Realizado' AND p.hojasTotales IS NOT NULL AND p.cursoAcademico = :cursoAcademico" +
 		   "GROUP BY p.color")
-	List<Object[]> contarHojasPorColor() ;
+	List<Object[]> contarHojasPorColor(String cursoAcademico) ;
 	
 	/**
 	 * Cuenta el número de impresiones agrupadas por estado.
@@ -80,8 +80,9 @@ public interface IPrintActionRepository extends JpaRepository<PrintAction, Long>
 	 * @return Lista de Object[] con [estado, COUNT(*)]
 	 */
 	@Query("SELECT p.status, COUNT(p) FROM PrintAction p " +
+		   "WHERE p.cursoAcademico = :cursoAcademico" +
 		   "GROUP BY p.status")
-	List<Object[]> contarPorEstado() ;
+	List<Object[]> contarPorEstado(String cursoAcademico) ;
 	
 	/**
 	 * Obtiene la fecha de la última impresión realizada por cada impresora.

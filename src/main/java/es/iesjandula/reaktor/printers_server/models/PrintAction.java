@@ -27,6 +27,10 @@ public class PrintAction
     @Id
     @GeneratedValue
     private long id ;
+
+    /** Atributo - Curso académico */
+    @Column
+    private String cursoAcademico ;
     
     /** Atributo - User */
     @Column
@@ -110,6 +114,26 @@ public class PrintAction
     public void setId(long id)
     {
         this.id = id ;
+    }
+
+    /**
+     * Obtiene el curso académico de la acción de impresión.
+     * 
+     * @return el curso académico
+     */
+    public String getCursoAcademico()
+    {
+        return this.cursoAcademico ;
+    }
+
+    /**
+     * Establece el curso académico de la acción de impresión.
+     * 
+     * @param cursoAcademico el curso académico a establecer
+     */
+    public void setCursoAcademico(String cursoAcademico)
+    {
+        this.cursoAcademico = cursoAcademico ;
     }
 
     /**

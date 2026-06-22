@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import es.iesjandula.reaktor.base.security.models.DtoAplicacion;
 import es.iesjandula.reaktor.base.security.models.DtoUsuarioExtended;
+import es.iesjandula.reaktor.base.utils.FechasUtils;
 import es.iesjandula.reaktor.base.utils.BaseConstants;
 import es.iesjandula.reaktor.printers_server.configurations.InicializacionSistema;
 import es.iesjandula.reaktor.printers_server.dto.DtoConstante;
@@ -729,6 +730,7 @@ public class PrinterRestWeb
 		// Creamos el objeto printAction con la configuracion recibida
 		PrintAction printAction = new PrintAction() ;
 
+		printAction.setCursoAcademico(FechasUtils.obtenerCursoAcademicoActual()) ;
 		printAction.setUser(user) ;
 		printAction.setPrinter(printerName) ;
 		printAction.setStatus(Constants.STATE_TODO) ;
